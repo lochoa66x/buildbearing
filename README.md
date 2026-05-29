@@ -43,3 +43,4 @@ npm run build
 6. Deploy. Vercel will run the Next.js build automatically.
 
 No authentication, database, payments, or analytics are included in this V1.
+ 
