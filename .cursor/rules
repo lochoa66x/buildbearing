@@ -1,0 +1,9 @@
+# BuildBearing Project Rules
+
+- Keep BuildBearing separate from PawBeat, Check It First, KeyScout, and Voynich Tech.
+- Use Next.js App Router patterns for pages, layouts, metadata, and routing.
+- Use Tailwind CSS for styling and keep components small, reusable, and readable.
+- Keep V1 static and lightweight. Do not add authentication, database, payments, or analytics yet.
+- Preserve the brand tone: clear, practical, warm, trustworthy, and product-led.
+- Keep content friendly to dark mode and responsive layouts.
+- Avoid overengineering. Prefer simple data arrays and focused components over heavy abstractions.
