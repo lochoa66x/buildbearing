@@ -5,6 +5,10 @@ function list(items: string[]) {
 }
 
 export function routeCardToMarkdown(card: RouteCard) {
+  const assumptions = card.assumptions?.length
+    ? `\n\n## Assumptions\n${list(card.assumptions)}`
+    : "";
+
   return `# ${card.title}
 
 ## Idea Summary
@@ -35,7 +39,7 @@ ${list(card.mvpScope)}
 ${list(card.suggestedScreensOrWorkflow)}
 
 ## Key Risks
-${list(card.keyRisks)}
+${list(card.keyRisks)}${assumptions}
 
 ## Next 3 Actions
 ${card.nextActions.map((action, index) => `${index + 1}. ${action}`).join("\n")}

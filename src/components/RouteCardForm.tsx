@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { routeCardToCodexPrompt } from "@/lib/route-card-codex-prompt";
 import { routeCardToMarkdown } from "@/lib/route-card-markdown";
 import type { RouteCard } from "@/types/route-card";
 import { RouteCardPreview } from "@/components/RouteCardPreview";
@@ -11,6 +12,12 @@ type FormState = {
   uncertainty: string;
   constraints: string;
 };
+
+type CopyTarget = "markdown" | "codex";
+type CopyState = {
+  target: CopyTarget;
+  status: "success" | "error";
+} | null;
 
 const initialFormState: FormState = {
   idea: "",
@@ -26,12 +33,16 @@ export function RouteCardForm() {
   const [card, setCard] = useState<RouteCard | null>(null);
   const [error, setError] = useState("");
   const [status, setStatus] = useState("");
-  const [copyState, setCopyState] = useState<"idle" | "success" | "error">("idle");
+  const [copyState, setCopyState] = useState<CopyState>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const copyResetTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const ideaLength = form.idea.trim().length;
   const markdown = useMemo(() => (card ? routeCardToMarkdown(card) : ""), [card]);
+  const codexPrompt = useMemo(
+    () => (card ? routeCardToCodexPrompt(card) : ""),
+    [card],
+  );
 
   useEffect(() => {
     return () => {
@@ -47,7 +58,7 @@ export function RouteCardForm() {
       copyResetTimeout.current = null;
     }
 
-    setCopyState("idle");
+    setCopyState(null);
   }
 
   function updateField(field: keyof FormState, value: string) {
@@ -94,20 +105,20 @@ export function RouteCardForm() {
     }
   }
 
-  async function copyMarkdown() {
-    if (!markdown) return;
+  async function copyText(target: CopyTarget, value: string) {
+    if (!value) return;
 
     resetCopyFeedback();
 
     try {
-      await navigator.clipboard.writeText(markdown);
-      setCopyState("success");
+      await navigator.clipboard.writeText(value);
+      setCopyState({ target, status: "success" });
       copyResetTimeout.current = setTimeout(() => {
-        setCopyState("idle");
+        setCopyState(null);
         copyResetTimeout.current = null;
       }, COPY_RESET_DELAY_MS);
     } catch {
-      setCopyState("error");
+      setCopyState({ target, status: "error" });
     }
   }
 
@@ -247,22 +258,36 @@ export function RouteCardForm() {
                 </p>
               </div>
               <div className="grid gap-2 sm:justify-items-end">
-                <button
-                  type="button"
-                  onClick={copyMarkdown}
-                  className="inline-flex min-h-11 items-center justify-center rounded-md bg-ink px-4 text-sm font-semibold text-white transition hover:bg-bearing-rust"
-                >
-                  {copyState === "success" ? "Markdown copied" : "Copy as Markdown"}
-                </button>
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <button
+                    type="button"
+                    onClick={() => copyText("markdown", markdown)}
+                    className="inline-flex min-h-11 items-center justify-center rounded-md bg-ink px-4 text-sm font-semibold text-white transition hover:bg-bearing-rust"
+                  >
+                    {copyState?.target === "markdown" &&
+                    copyState.status === "success"
+                      ? "Markdown copied"
+                      : "Copy as Markdown"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => copyText("codex", codexPrompt)}
+                    className="inline-flex min-h-11 items-center justify-center rounded-md border border-ink/15 px-4 text-sm font-semibold text-ink transition hover:border-bearing-rust hover:text-bearing-rust"
+                  >
+                    {copyState?.target === "codex" && copyState.status === "success"
+                      ? "Codex prompt copied"
+                      : "Copy as Codex Prompt"}
+                  </button>
+                </div>
                 <p
                   aria-live="polite"
                   className={`min-h-5 text-xs font-medium ${
-                    copyState === "error" ? "text-bearing-rust" : "text-slate-600"
+                    copyState?.status === "error" ? "text-bearing-rust" : "text-slate-600"
                   }`}
                 >
-                  {copyState === "success"
+                  {copyState?.status === "success"
                     ? "Copied to clipboard."
-                    : copyState === "error"
+                    : copyState?.status === "error"
                       ? "Could not copy. Please try again."
                       : ""}
                 </p>

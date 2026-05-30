@@ -134,6 +134,17 @@ export function RouteCardPreview({ card }: RouteCardPreviewProps) {
         </section>
       </div>
 
+      {card.assumptions?.length ? (
+        <section className="mt-3 rounded-lg border border-ink/10 bg-white/[0.55] p-3">
+          <p className="text-xs font-semibold uppercase text-bearing-blue">
+            Assumptions
+          </p>
+          <div className="mt-2">
+            <BulletList items={card.assumptions} />
+          </div>
+        </section>
+      ) : null}
+
       <section className="mt-3 rounded-lg border border-ink/10 bg-[#28303d] p-3 text-white">
         <p className="text-xs font-semibold uppercase text-bearing-gold">
           Next 3 actions

@@ -19,6 +19,7 @@ export type RouteCard = {
   keyRisks: string[];
   nextActions: [string, string, string];
   launchReadinessNotes: string;
+  assumptions?: string[];
 };
 
 export type RouteCardResponse = {
