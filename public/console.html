@@ -1,0 +1,4784 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>BuildBearing Command Centre</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #19211f;
+      --muted: #66736d;
+      --paper: #f5f7f1;
+      --panel: #ffffff;
+      --line: #dfe6dd;
+      --line-strong: #c5d1ca;
+      --green: #2f8f70;
+      --blue: #2c6fbb;
+      --red: #c65252;
+      --amber: #c98b2c;
+      --plum: #7251a3;
+      --teal: #25818a;
+      --charcoal: #202827;
+      --shadow: 0 10px 30px rgba(32, 40, 39, 0.08);
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    body.locked {
+      overflow: hidden;
+      background: #111816;
+    }
+
+    body.locked .app {
+      display: none;
+    }
+
+    body:not(.locked) .private-gate {
+      display: none;
+    }
+
+    .private-gate {
+      position: relative;
+      min-height: 100vh;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.72fr);
+      gap: clamp(20px, 5vw, 64px);
+      align-items: center;
+      padding: clamp(20px, 5vw, 58px);
+      background: #111816;
+      color: #f7fbf8;
+    }
+
+    .private-gate::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.24));
+      pointer-events: none;
+    }
+
+    .gate-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #ffffff;
+      font-size: 1.15rem;
+      font-weight: 850;
+    }
+
+    .gate-brand-mark {
+      width: 36px;
+      height: 36px;
+      border: 2px solid #f1b543;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      color: #f1b543;
+      font-size: 0.78rem;
+      font-weight: 900;
+    }
+
+    .gate-stage,
+    .gate-panel {
+      position: relative;
+      z-index: 1;
+    }
+
+    .gate-stage {
+      display: grid;
+      gap: 24px;
+      max-width: 840px;
+    }
+
+    .gate-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      min-height: 30px;
+      padding: 5px 10px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 999px;
+      color: #c9d9d2;
+      background: rgba(255, 255, 255, 0.07);
+      font-size: 0.8rem;
+      font-weight: 750;
+    }
+
+    .gate-kicker.gold {
+      border-color: rgba(241, 181, 67, 0.42);
+      color: #f4c56f;
+      background: rgba(241, 181, 67, 0.1);
+    }
+
+    .gate-stage h1 {
+      max-width: 760px;
+      color: #ffffff;
+      font-size: clamp(3rem, 7.6vw, 6.4rem);
+      line-height: 0.92;
+      letter-spacing: 0;
+    }
+
+    .gate-stage p {
+      max-width: 620px;
+      color: #c7d7d1;
+      font-size: clamp(1rem, 1.6vw, 1.25rem);
+      line-height: 1.45;
+    }
+
+    .gate-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .gate-secondary {
+      color: #ffffff;
+      border-color: rgba(241, 181, 67, 0.44);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .gate-domains {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      max-width: 680px;
+    }
+
+    .domain-chip {
+      min-height: 32px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 999px;
+      color: #e7f0ec;
+      background: rgba(255, 255, 255, 0.08);
+      font-size: 0.82rem;
+    }
+
+    .signal-board {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      max-width: 720px;
+    }
+
+    .signal-tile {
+      min-height: 98px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 8px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      display: grid;
+      align-content: space-between;
+      gap: 12px;
+      backdrop-filter: blur(10px);
+    }
+
+    .signal-tile span {
+      color: #bdd0c7;
+      font-size: 0.78rem;
+    }
+
+    .signal-tile strong {
+      color: #ffffff;
+      font-size: 1.05rem;
+    }
+
+    .gate-panel.preview {
+      background: rgba(13, 19, 22, 0.78);
+    }
+
+    .gate-preview-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 14px;
+    }
+
+    .gate-preview-head span {
+      color: #8fcf95;
+      font-size: 0.78rem;
+      white-space: nowrap;
+    }
+
+    .gate-preview-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .gate-preview-card {
+      min-height: 86px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      display: grid;
+      align-content: space-between;
+      gap: 10px;
+    }
+
+    .gate-preview-card span {
+      color: #b9c9c3;
+      font-size: 0.76rem;
+    }
+
+    .gate-preview-card strong {
+      color: #ffffff;
+      font-size: 1.3rem;
+      line-height: 1;
+    }
+
+    .gate-preview-wide {
+      grid-column: 1 / -1;
+    }
+
+    .gate-panel {
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 8px;
+      padding: clamp(18px, 3vw, 28px);
+      background: rgba(255, 255, 255, 0.1);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.26);
+      backdrop-filter: blur(18px);
+      display: grid;
+      gap: 18px;
+    }
+
+    .gate-panel h2 {
+      color: #ffffff;
+      font-size: clamp(1.35rem, 2vw, 1.85rem);
+    }
+
+    .gate-panel p {
+      color: #c7d7d1;
+      line-height: 1.45;
+    }
+
+    .gate-form {
+      display: grid;
+      gap: 12px;
+    }
+
+    .gate-form label {
+      color: #dce8e3;
+      font-size: 0.84rem;
+      font-weight: 750;
+    }
+
+    .gate-form input {
+      width: 100%;
+      min-height: 46px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+      outline: none;
+    }
+
+    .gate-form input:focus {
+      border-color: #8fd4bd;
+      box-shadow: 0 0 0 3px rgba(143, 212, 189, 0.18);
+    }
+
+    .gate-form input::placeholder {
+      color: #9fb2ab;
+    }
+
+    .gate-message {
+      min-height: 20px;
+      color: #ffd0d0;
+      font-size: 0.82rem;
+    }
+
+    .gate-meta {
+      display: grid;
+      gap: 10px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .gate-meta-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      color: #c7d7d1;
+      font-size: 0.85rem;
+    }
+
+    .gate-meta-row strong {
+      color: #ffffff;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 268px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      background: var(--charcoal);
+      color: #f6fbf8;
+      padding: 20px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 24px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 44px;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      background: #e6f4eb;
+      color: var(--charcoal);
+      font-weight: 850;
+      font-size: 0.9rem;
+    }
+
+    .brand-text {
+      display: grid;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .brand-text strong {
+      font-size: 1rem;
+      line-height: 1.1;
+    }
+
+    .brand-text span {
+      color: #aebbb6;
+      font-size: 0.78rem;
+      line-height: 1.2;
+    }
+
+    .icon-button {
+      width: 38px;
+      height: 38px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.06);
+      color: inherit;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+    }
+
+    .icon-button:hover,
+    .icon-button:focus-visible {
+      border-color: rgba(255, 255, 255, 0.42);
+      outline: none;
+    }
+
+    .nav {
+      display: grid;
+      gap: 8px;
+      align-content: start;
+    }
+
+    .nav button {
+      width: 100%;
+      min-height: 42px;
+      display: grid;
+      grid-template-columns: 20px 1fr auto;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 10px;
+      color: #dfe9e4;
+      border: 1px solid transparent;
+      background: transparent;
+      border-radius: 8px;
+      text-align: left;
+    }
+
+    .nav button:hover,
+    .nav button.active {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+    }
+
+    .nav small {
+      color: #aebbb6;
+      font-size: 0.72rem;
+    }
+
+    .portfolio-status {
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 0.83rem;
+      color: #dbe5e0;
+    }
+
+    .status-row strong {
+      color: #ffffff;
+    }
+
+    .content {
+      min-width: 0;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(245, 247, 241, 0.9);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--line);
+      padding: 16px clamp(16px, 3vw, 34px);
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) auto;
+      align-items: center;
+      gap: 14px;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: clamp(1.25rem, 2vw, 1.85rem);
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      font-size: 1rem;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      font-size: 0.9rem;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .top-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .panel-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .button {
+      min-height: 38px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      color: var(--ink);
+      background: var(--panel);
+      box-shadow: 0 1px 0 rgba(32, 40, 39, 0.04);
+      white-space: nowrap;
+    }
+
+    .button:hover,
+    .button:focus-visible {
+      border-color: #9eaea6;
+      outline: none;
+    }
+
+    .button.primary {
+      background: var(--charcoal);
+      color: #ffffff;
+      border-color: var(--charcoal);
+    }
+
+    .button.ghost {
+      background: transparent;
+    }
+
+    .main {
+      padding: 22px clamp(16px, 3vw, 34px) 34px;
+      display: grid;
+      gap: 18px;
+      align-content: start;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(180px, 1fr) auto auto;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .search {
+      position: relative;
+      min-width: 0;
+    }
+
+    .search svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    .search input {
+      width: 100%;
+      min-height: 40px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      padding: 8px 12px 8px 40px;
+      background: var(--panel);
+      color: var(--ink);
+      outline: none;
+    }
+
+    .search input:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(47, 143, 112, 0.12);
+    }
+
+    .segmented {
+      min-height: 40px;
+      display: inline-grid;
+      grid-auto-flow: column;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--panel);
+    }
+
+    .segmented button {
+      min-width: 56px;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      padding: 8px 12px;
+      border-right: 1px solid var(--line);
+    }
+
+    .segmented button:last-child {
+      border-right: 0;
+    }
+
+    .segmented button.active {
+      background: var(--charcoal);
+      color: #ffffff;
+    }
+
+    .select-wrap select {
+      min-height: 40px;
+      min-width: 168px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      padding: 8px 36px 8px 12px;
+      background: var(--panel);
+      color: var(--ink);
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .live-snapshot {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      background: #111816;
+      box-shadow: var(--shadow);
+    }
+
+    .snapshot-card {
+      min-height: 76px;
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr);
+      gap: 10px;
+      align-items: center;
+      padding: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      color: #ffffff;
+    }
+
+    .snapshot-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      border: 1px solid currentColor;
+      color: #f1b543;
+      background: rgba(241, 181, 67, 0.1);
+    }
+
+    .snapshot-icon.online {
+      color: #63c980;
+      background: rgba(99, 201, 128, 0.1);
+    }
+
+    .snapshot-icon.offline {
+      color: #ee6a5f;
+      background: rgba(238, 106, 95, 0.1);
+    }
+
+    .snapshot-copy {
+      display: grid;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .snapshot-copy strong {
+      font-size: 1.15rem;
+      line-height: 1;
+    }
+
+    .snapshot-copy span {
+      color: #bdcbc7;
+      font-size: 0.78rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .metric {
+      min-height: 118px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+      display: grid;
+      gap: 12px;
+      align-content: space-between;
+    }
+
+    .metric-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    .metric-value {
+      font-size: clamp(1.45rem, 2.4vw, 2rem);
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .metric-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .trend {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 700;
+    }
+
+    .trend.good {
+      color: var(--green);
+    }
+
+    .trend.bad {
+      color: var(--red);
+    }
+
+    .trend.flat {
+      color: var(--amber);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.85fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      min-width: 0;
+    }
+
+    .panel-header {
+      min-height: 58px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .panel-title {
+      display: grid;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .panel-title span {
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.25;
+    }
+
+    .panel-body {
+      padding: 16px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+    }
+
+    th,
+    td {
+      padding: 12px 10px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: middle;
+      font-size: 0.88rem;
+      white-space: nowrap;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: #fbfcf8;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    tbody tr {
+      cursor: pointer;
+    }
+
+    tbody tr:hover,
+    tbody tr.selected {
+      background: #f2f7f4;
+    }
+
+    .site-cell {
+      display: grid;
+      grid-template-columns: 32px minmax(0, 1fr);
+      gap: 10px;
+      align-items: center;
+    }
+
+    .site-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 0.78rem;
+    }
+
+    .site-name {
+      display: grid;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .site-name strong {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .site-name small {
+      color: var(--muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 24px;
+      border-radius: 999px;
+      padding: 3px 9px;
+      font-size: 0.74rem;
+      font-weight: 750;
+      border: 1px solid transparent;
+    }
+
+    .pill.keep {
+      color: #1e6b56;
+      background: #e5f5ee;
+      border-color: #c7e7da;
+    }
+
+    .pill.watch {
+      color: #835500;
+      background: #fff0d5;
+      border-color: #efd49e;
+    }
+
+    .pill.retire {
+      color: #943c3c;
+      background: #fde7e7;
+      border-color: #efcaca;
+    }
+
+    .pill.online {
+      color: #1e6b56;
+      background: #e5f5ee;
+      border-color: #c7e7da;
+    }
+
+    .pill.degraded,
+    .pill.stale {
+      color: #835500;
+      background: #fff0d5;
+      border-color: #efd49e;
+    }
+
+    .pill.offline,
+    .pill.error {
+      color: #943c3c;
+      background: #fde7e7;
+      border-color: #efcaca;
+    }
+
+    .pill.idle {
+      color: #52615c;
+      background: #edf2ee;
+      border-color: #d8e1dc;
+    }
+
+    .pill.connected,
+    .pill.linked,
+    .pill.ready,
+    .pill.private,
+    .pill.protected {
+      color: #1e6b56;
+      background: #e5f5ee;
+      border-color: #c7e7da;
+    }
+
+    .pill.pending,
+    .pill.planned,
+    .pill.noindex,
+    .pill.manual {
+      color: #835500;
+      background: #fff0d5;
+      border-color: #efd49e;
+    }
+
+    .pill.missing,
+    .pill.unreachable {
+      color: #943c3c;
+      background: #fde7e7;
+      border-color: #efcaca;
+    }
+
+    .spark {
+      width: 100px;
+      height: 28px;
+      display: block;
+    }
+
+    .detail-stack {
+      display: grid;
+      gap: 18px;
+    }
+
+    .selected-site {
+      display: grid;
+      gap: 14px;
+    }
+
+    .site-hero {
+      display: grid;
+      gap: 12px;
+    }
+
+    .site-head {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .site-head .site-icon {
+      width: 44px;
+      height: 44px;
+    }
+
+    .score {
+      display: grid;
+      gap: 8px;
+    }
+
+    .score-row {
+      display: grid;
+      grid-template-columns: 98px 1fr 38px;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.82rem;
+    }
+
+    .meter {
+      height: 8px;
+      border-radius: 999px;
+      background: #e8eee9;
+      overflow: hidden;
+    }
+
+    .meter span {
+      display: block;
+      height: 100%;
+      width: var(--value, 0%);
+      background: var(--bar, var(--green));
+      border-radius: inherit;
+    }
+
+    .bars {
+      display: grid;
+      gap: 11px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 112px 1fr 44px;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.82rem;
+    }
+
+    .bar-track {
+      height: 10px;
+      background: #edf2ee;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      display: block;
+      height: 100%;
+      width: var(--w);
+      background: var(--c);
+      border-radius: inherit;
+    }
+
+    .source-stack {
+      height: 16px;
+      display: flex;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #edf2ee;
+      margin-bottom: 13px;
+    }
+
+    .source-stack span {
+      display: block;
+      width: var(--w);
+      background: var(--c);
+    }
+
+    .legend {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      font-size: 0.8rem;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--c);
+      flex: 0 0 auto;
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .mini-stat {
+      min-height: 72px;
+      display: grid;
+      gap: 6px;
+      align-content: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      background: #fbfcf8;
+    }
+
+    .mini-stat span {
+      color: var(--muted);
+      font-size: 0.74rem;
+    }
+
+    .mini-stat strong {
+      font-size: 1.05rem;
+      line-height: 1;
+    }
+
+    .insights {
+      display: grid;
+      gap: 10px;
+    }
+
+    .insight {
+      display: grid;
+      grid-template-columns: 24px minmax(0, 1fr);
+      gap: 10px;
+      padding: 11px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .insight:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .insight-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 7px;
+      display: grid;
+      place-items: center;
+      color: #ffffff;
+    }
+
+    .insight p {
+      font-size: 0.84rem;
+      line-height: 1.35;
+    }
+
+    .query-table {
+      min-width: 640px;
+    }
+
+    .calculator {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 0.8fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .controls {
+      display: grid;
+      gap: 14px;
+    }
+
+    .control {
+      display: grid;
+      grid-template-columns: 180px minmax(0, 1fr) 82px;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .control label {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .control input[type="range"] {
+      width: 100%;
+      accent-color: var(--green);
+    }
+
+    .control input[type="number"] {
+      width: 100%;
+      min-height: 36px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      padding: 7px 9px;
+      color: var(--ink);
+      background: #ffffff;
+    }
+
+    .forecast-card {
+      min-height: 100%;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #202827;
+      color: #ffffff;
+      padding: 16px;
+      display: grid;
+      gap: 14px;
+      align-content: space-between;
+    }
+
+    .forecast-main {
+      display: grid;
+      gap: 8px;
+    }
+
+    .forecast-main span {
+      color: #bdd0c7;
+      font-size: 0.84rem;
+    }
+
+    .forecast-main strong {
+      font-size: clamp(2rem, 4vw, 3.4rem);
+      line-height: 0.95;
+      letter-spacing: 0;
+    }
+
+    .forecast-breakdown {
+      display: grid;
+      gap: 9px;
+      font-size: 0.84rem;
+    }
+
+    .forecast-breakdown div {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: #dfe9e4;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      padding-top: 9px;
+    }
+
+    .retire-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .retire-item {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+      background: #fbfcf8;
+    }
+
+    .retire-item strong {
+      font-size: 0.98rem;
+    }
+
+    .retire-reasons {
+      display: grid;
+      gap: 7px;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .retire-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .ops-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .ops-summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--muted);
+      box-shadow: 0 0 0 3px rgba(102, 115, 109, 0.12);
+    }
+
+    .status-dot.online {
+      background: var(--green);
+      box-shadow: 0 0 0 3px rgba(47, 143, 112, 0.14);
+    }
+
+    .status-dot.connected,
+    .status-dot.protected,
+    .status-dot.ready,
+    .status-dot.private {
+      background: var(--green);
+      box-shadow: 0 0 0 3px rgba(47, 143, 112, 0.14);
+    }
+
+    .status-dot.degraded,
+    .status-dot.stale,
+    .status-dot.pending,
+    .status-dot.planned,
+    .status-dot.missing,
+    .status-dot.manual,
+    .status-dot.noindex {
+      background: var(--amber);
+      box-shadow: 0 0 0 3px rgba(201, 139, 44, 0.16);
+    }
+
+    .status-dot.offline,
+    .status-dot.error,
+    .status-dot.unreachable {
+      background: var(--red);
+      box-shadow: 0 0 0 3px rgba(198, 82, 82, 0.14);
+    }
+
+    .status-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .incident-feed {
+      display: grid;
+      gap: 10px;
+    }
+
+    .incident-item {
+      display: grid;
+      grid-template-columns: 10px minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: start;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 0.84rem;
+    }
+
+    .incident-item:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .incident-copy {
+      display: grid;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .incident-copy strong,
+    .incident-copy span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .api-total {
+      display: grid;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: #fbfcf8;
+      margin-bottom: 14px;
+    }
+
+    .api-total strong {
+      font-size: clamp(1.4rem, 2vw, 2rem);
+      line-height: 1;
+    }
+
+    .api-breakdown {
+      display: grid;
+      gap: 6px;
+      font-size: 0.84rem;
+    }
+
+    .api-breakdown div {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      border-top: 1px solid var(--line);
+      padding-top: 7px;
+    }
+
+    .api-breakdown span {
+      color: var(--muted);
+    }
+
+    .connector-overview {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .registry-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .registry-strip .mini-stat {
+      min-height: 64px;
+    }
+
+    .connector-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(320px, 0.72fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .connector-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .connector-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: #fbfcf8;
+      display: grid;
+      gap: 12px;
+    }
+
+    .connector-card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 12px;
+    }
+
+    .connector-card-head div {
+      min-width: 0;
+    }
+
+    .connector-card-head strong,
+    .connector-card-head span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .connector-stack {
+      display: grid;
+      gap: 8px;
+    }
+
+    .connector-row {
+      display: grid;
+      grid-template-columns: 112px minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      font-size: 0.82rem;
+    }
+
+    .connector-row span,
+    .connector-row code {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .connector-row code,
+    .code-snippet {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+
+    .code-snippet {
+      display: block;
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: #202827;
+      color: #eaf4ef;
+      font-size: 0.78rem;
+      line-height: 1.45;
+      white-space: pre;
+    }
+
+    .next-steps {
+      display: grid;
+      gap: 10px;
+    }
+
+    .step-item {
+      display: grid;
+      grid-template-columns: 24px minmax(0, 1fr);
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .step-item:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .step-item p {
+      font-size: 0.84rem;
+      line-height: 1.35;
+    }
+
+    .attention-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .attention-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .attention-item {
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: start;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcf8;
+    }
+
+    .attention-item.offline {
+      border-color: #efcaca;
+      background: #fff6f4;
+    }
+
+    .attention-item.degraded,
+    .attention-item.missing,
+    .attention-item.planned {
+      border-color: #efd49e;
+      background: #fffaf0;
+    }
+
+    .attention-item.drifting {
+      border-color: #c9dff3;
+      background: #f5f9fd;
+    }
+
+    .attention-item .small-button {
+      align-self: center;
+    }
+
+    .attention-rank {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      color: #ffffff;
+      background: var(--charcoal);
+      font-weight: 850;
+      font-size: 0.82rem;
+    }
+
+    .attention-item.offline .attention-rank {
+      background: var(--red);
+    }
+
+    .attention-item.degraded .attention-rank,
+    .attention-item.missing .attention-rank,
+    .attention-item.planned .attention-rank {
+      background: var(--amber);
+    }
+
+    .severity-pill {
+      width: fit-content;
+      display: inline-flex;
+      min-height: 22px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      border: 1px solid var(--line);
+    }
+
+    .severity-pill.high {
+      color: #943c3c;
+      background: #fde7e7;
+      border-color: #efcaca;
+    }
+
+    .severity-pill.medium {
+      color: #835500;
+      background: #fff0d5;
+      border-color: #efd49e;
+    }
+
+    .severity-pill.low {
+      color: #285f91;
+      background: #e5f0fb;
+      border-color: #c9dff3;
+    }
+
+    .attention-copy {
+      display: grid;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .attention-copy strong,
+    .attention-copy span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .attention-copy p {
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.35;
+    }
+
+    .briefing {
+      display: grid;
+      gap: 12px;
+    }
+
+    .briefing-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: #202827;
+      color: #ffffff;
+      display: grid;
+      gap: 12px;
+    }
+
+    .briefing-card p {
+      color: #dce8e3;
+      line-height: 1.45;
+      font-size: 0.9rem;
+    }
+
+    .momentum-summary {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .momentum-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: #fbfcf8;
+      display: grid;
+      gap: 8px;
+      min-height: 86px;
+      align-content: space-between;
+    }
+
+    .momentum-card span {
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .momentum-card strong {
+      font-size: 1.2rem;
+      line-height: 1;
+    }
+
+    .momentum-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 24px;
+      border-radius: 999px;
+      padding: 3px 9px;
+      font-size: 0.74rem;
+      font-weight: 800;
+      border: 1px solid transparent;
+    }
+
+    .momentum-pill.growing {
+      color: #1e6b56;
+      background: #e5f5ee;
+      border-color: #c7e7da;
+    }
+
+    .momentum-pill.stable,
+    .momentum-pill.private {
+      color: #285f91;
+      background: #e5f0fb;
+      border-color: #c9dff3;
+    }
+
+    .momentum-pill.drifting {
+      color: #835500;
+      background: #fff0d5;
+      border-color: #efd49e;
+    }
+
+    .momentum-pill.rescue,
+    .momentum-pill.retire {
+      color: #943c3c;
+      background: #fde7e7;
+      border-color: #efcaca;
+    }
+
+    .momentum-table {
+      min-width: 720px;
+    }
+
+    .truth-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .truth-columns {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .truth-list {
+      display: grid;
+      gap: 8px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcf8;
+    }
+
+    .truth-list h3 {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .truth-list ul,
+    .milestone-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 8px;
+    }
+
+    .truth-list li,
+    .milestone-list li {
+      display: flex;
+      align-items: start;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.35;
+    }
+
+    .check-dot,
+    .number-dot {
+      flex: 0 0 auto;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 0.72rem;
+      font-weight: 850;
+    }
+
+    .check-dot.real {
+      color: #ffffff;
+      background: var(--green);
+    }
+
+    .check-dot.pending,
+    .number-dot {
+      color: #6d4700;
+      background: #fff0d5;
+      border: 1px solid #efd49e;
+    }
+
+    .milestone-list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .small-button {
+      min-height: 32px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      padding: 6px 9px;
+      background: #ffffff;
+      color: var(--ink);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+    }
+
+    .small-button.danger {
+      border-color: #e4baba;
+      color: #943c3c;
+      background: #fff6f6;
+    }
+
+    .small-button.keep {
+      border-color: #bcdccd;
+      color: #1e6b56;
+      background: #f3fbf7;
+    }
+
+    .toast {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      z-index: 30;
+      display: none;
+      max-width: min(360px, calc(100vw - 40px));
+      border-radius: 8px;
+      padding: 12px 14px;
+      background: var(--charcoal);
+      color: #ffffff;
+      box-shadow: 0 20px 50px rgba(32, 40, 39, 0.2);
+      font-size: 0.88rem;
+    }
+
+    .toast.show {
+      display: block;
+      animation: lift 240ms ease-out;
+    }
+
+    @keyframes lift {
+      from {
+        transform: translateY(10px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    dialog {
+      width: min(680px, calc(100vw - 28px));
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0;
+      box-shadow: 0 24px 70px rgba(32, 40, 39, 0.24);
+    }
+
+    dialog::backdrop {
+      background: rgba(25, 33, 31, 0.38);
+    }
+
+    .dialog-header,
+    .dialog-footer {
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .dialog-header {
+      border-bottom: 1px solid var(--line);
+    }
+
+    .dialog-footer {
+      border-top: 1px solid var(--line);
+      justify-content: flex-end;
+    }
+
+    .dialog-body {
+      padding: 16px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field label {
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .field input,
+    .field select {
+      min-height: 38px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      padding: 8px 10px;
+    }
+
+    .empty-state {
+      min-height: 160px;
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      text-align: center;
+      padding: 24px;
+    }
+
+    .empty-state strong {
+      color: var(--ink);
+    }
+
+    .empty-state span {
+      display: block;
+      max-width: 360px;
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+
+    svg {
+      width: 18px;
+      height: 18px;
+      stroke-width: 2;
+      stroke: currentColor;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      flex: 0 0 auto;
+    }
+
+    .hide {
+      display: none !important;
+    }
+
+    @media (max-width: 1120px) {
+      .private-gate {
+        grid-template-columns: 1fr;
+        align-items: start;
+        overflow-y: auto;
+      }
+
+      .signal-board {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .live-snapshot {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .grid,
+      .ops-grid,
+      .connector-grid,
+      .attention-grid,
+      .truth-grid,
+      .calculator {
+        grid-template-columns: 1fr;
+      }
+
+      .retire-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 840px) {
+      body.locked {
+        overflow: auto;
+      }
+
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+        height: auto;
+        padding: 14px;
+        grid-template-rows: auto;
+      }
+
+      .nav,
+      .portfolio-status {
+        display: none;
+      }
+
+      .topbar {
+        position: static;
+        grid-template-columns: 1fr;
+      }
+
+      .top-actions {
+        justify-content: stretch;
+      }
+
+      .top-actions .button {
+        flex: 1 1 160px;
+      }
+
+      .toolbar {
+        grid-template-columns: 1fr;
+      }
+
+      .segmented {
+        width: 100%;
+      }
+
+      .segmented button {
+        min-width: 0;
+      }
+
+      .select-wrap select {
+        width: 100%;
+      }
+
+      .metrics,
+      .live-snapshot,
+      .ops-summary,
+      .connector-overview,
+      .retire-grid,
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .truth-columns,
+      .milestone-list {
+        grid-template-columns: 1fr;
+      }
+
+      .signal-board {
+        grid-template-columns: 1fr;
+      }
+
+      .gate-preview-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .momentum-summary {
+        grid-template-columns: 1fr;
+      }
+
+      .control {
+        grid-template-columns: 1fr;
+        gap: 7px;
+      }
+
+      .mini-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .main {
+        padding-inline: 12px;
+      }
+
+      .topbar {
+        padding-inline: 12px;
+      }
+
+      .panel-header {
+        align-items: start;
+        flex-direction: column;
+      }
+
+      .panel-actions {
+        justify-content: flex-start;
+        width: 100%;
+      }
+
+      .legend {
+        grid-template-columns: 1fr;
+      }
+
+      .bar-row,
+      .score-row,
+      .connector-row {
+        grid-template-columns: 92px 1fr 34px;
+      }
+
+      .attention-item {
+        grid-template-columns: 30px minmax(0, 1fr);
+      }
+
+      .attention-item .small-button {
+        grid-column: 2;
+        width: fit-content;
+      }
+    }
+  </style>
+</head>
+<body>
+  <section class="private-gate" id="privateGate" aria-label="Private access">
+    <div class="gate-stage">
+      <div class="gate-brand">
+        <div class="gate-brand-mark">BB</div>
+        <strong>BuildBearing</strong>
+      </div>
+      <div class="gate-kicker gold"><span class="status-dot online"></span> Password locked - Internal founder cockpit</div>
+      <h1>The private command centre for everything we're building.</h1>
+      <p>Track project health, momentum, uptime, APIs, and retirement decisions across the Voynich Tech ecosystem.</p>
+      <div class="gate-actions">
+        <button class="button primary" id="gateFocusPassword" type="button">
+          <svg viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          Enter Command Centre
+        </button>
+        <button class="button gate-secondary" id="gatePreviewRegistry" type="button">
+          <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.07 0l2.12-2.12a5 5 0 0 0-7.07-7.07L10.9 5.03"/><path d="M14 11a5 5 0 0 0-7.07 0L4.81 13.12a5 5 0 0 0 7.07 7.07l1.22-1.22"/></svg>
+          View Live Registry
+        </button>
+      </div>
+      <div class="gate-domains" aria-label="Connected properties">
+        <span class="domain-chip"><span class="status-dot online"></span>voynichtech.ca</span>
+        <span class="domain-chip"><span class="status-dot offline"></span>matchseer.ca</span>
+        <span class="domain-chip"><span class="status-dot online"></span>niftytoolshub.com</span>
+        <span class="domain-chip"><span class="status-dot online"></span>chronovisorai.com</span>
+        <span class="domain-chip"><span class="status-dot online"></span>keyscout.app</span>
+      </div>
+      <div class="signal-board" aria-label="Private host status">
+        <div class="signal-tile"><span>Projects checked</span><strong id="gateProjects">6</strong></div>
+        <div class="signal-tile"><span>Websites live</span><strong id="gateWebsites">5</strong></div>
+        <div class="signal-tile"><span>Health endpoint live</span><strong id="gateHealth">1</strong></div>
+        <div class="signal-tile"><span>Unreachable</span><strong id="gateUnreachable">1</strong></div>
+        <div class="signal-tile"><span>Missing /api/health</span><strong id="gateMissing">4</strong></div>
+        <div class="signal-tile"><span>Public index</span><strong>Blocked</strong></div>
+      </div>
+    </div>
+
+    <form class="gate-panel preview" id="gateForm">
+      <div class="gate-preview-head">
+        <div>
+          <h2>Command centre overview</h2>
+          <p>Live status across the current project registry.</p>
+        </div>
+        <span id="gateChecked">Last checked: local seed</span>
+      </div>
+      <div class="gate-preview-grid" aria-label="Private command centre preview">
+        <div class="gate-preview-card"><span>Projects</span><strong id="gatePreviewProjects">6</strong></div>
+        <div class="gate-preview-card"><span>Websites live</span><strong id="gatePreviewWebsites">5</strong></div>
+        <div class="gate-preview-card"><span>Health live</span><strong id="gatePreviewHealth">1</strong></div>
+        <div class="gate-preview-card"><span>Unreachable</span><strong id="gatePreviewUnreachable">1</strong></div>
+        <div class="gate-preview-card gate-preview-wide"><span>Missing /api/health</span><strong id="gatePreviewMissing">4</strong></div>
+      </div>
+      <div>
+        <h2>Private entry</h2>
+        <p>Command centre lives here now. The old BuildBearing shell becomes the locked front door.</p>
+      </div>
+      <div class="gate-form">
+        <label for="gatePassword">Team password</label>
+        <input id="gatePassword" type="password" placeholder="Enter password" autocomplete="current-password">
+        <button class="button primary" id="unlockButton" type="submit">
+          <svg viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          Enter Centre
+        </button>
+        <div class="gate-message" id="gateMessage" role="status" aria-live="polite"></div>
+      </div>
+      <div class="gate-meta">
+        <div class="gate-meta-row"><span>Landing</span><strong>Internal</strong></div>
+        <div class="gate-meta-row"><span>Search</span><strong>No index</strong></div>
+        <div class="gate-meta-row"><span>Next layer</span><strong>Server auth</strong></div>
+      </div>
+    </form>
+  </section>
+
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+          <div class="brand-mark">cc</div>
+          <div class="brand-text">
+            <strong>command.centre</strong>
+            <span>Portfolio intelligence</span>
+          </div>
+        </div>
+        <button class="icon-button" id="refreshButton" aria-label="Refresh data" title="Refresh data">
+          <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+        </button>
+      </div>
+
+      <nav class="nav" aria-label="Sections">
+        <button class="active" data-scroll-target="overview">
+          <svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-7"/></svg>
+          <span>Overview</span>
+          <small id="navSites">6</small>
+        </button>
+        <button data-scroll-target="today">
+          <svg viewBox="0 0 24 24"><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/></svg>
+          <span>Today</span>
+          <small id="navToday">0</small>
+        </button>
+        <button data-scroll-target="ops">
+          <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 8-6-16-3 8H2"/></svg>
+          <span>Ops</span>
+          <small id="navOps">0</small>
+        </button>
+        <button data-scroll-target="connect">
+          <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.07 0l2.12-2.12a5 5 0 0 0-7.07-7.07L10.9 5.03"/><path d="M14 11a5 5 0 0 0-7.07 0L4.81 13.12a5 5 0 0 0 7.07 7.07l1.22-1.22"/></svg>
+          <span>Connect</span>
+          <small id="navConnect">0</small>
+        </button>
+        <button data-scroll-target="search">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <span>Search</span>
+          <small id="navQueries">0</small>
+        </button>
+        <button data-scroll-target="forecast">
+          <svg viewBox="0 0 24 24"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14a3.5 3.5 0 0 1 0 7H6"/></svg>
+          <span>Revenue</span>
+          <small id="navRevenue">$0</small>
+        </button>
+        <button data-scroll-target="retire">
+          <svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+          <span>Retire</span>
+          <small id="navRetire">0</small>
+        </button>
+      </nav>
+
+      <div class="portfolio-status">
+        <div class="status-row"><span>Data source</span><strong id="sidebarSource">Registry</strong></div>
+        <div class="status-row"><span>Window</span><strong id="sidebarWindow">30 days</strong></div>
+        <div class="status-row"><span>Health</span><strong id="sidebarHealth">0%</strong></div>
+      </div>
+    </aside>
+
+    <section class="content">
+      <header class="topbar">
+        <div>
+          <h1>BuildBearing Command Centre</h1>
+          <p class="muted" id="subtitle">Private founder cockpit for uptime, APIs, momentum, revenue, and retirement signals.</p>
+        </div>
+        <div class="top-actions">
+          <form method="post" action="/api/logout" style="margin:0;">
+            <button class="button" type="submit">
+              <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+              Logout
+            </button>
+          </form>
+          <button class="button" id="exportButton">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+            Export CSV
+          </button>
+          <button class="button primary" id="addSiteButton">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+            Add site
+          </button>
+        </div>
+      </header>
+
+      <main class="main">
+        <section class="toolbar" id="overview">
+          <div class="search">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            <input id="siteSearch" type="search" placeholder="Search sites, domains, or categories" autocomplete="off">
+          </div>
+          <div class="segmented" role="group" aria-label="Reporting window">
+            <button class="active" data-window="30">30d</button>
+            <button data-window="90">90d</button>
+            <button data-window="365">12m</button>
+          </div>
+          <div class="select-wrap">
+            <select id="statusFilter" aria-label="Status filter">
+              <option value="all">All sites</option>
+              <option value="keep">Keep</option>
+              <option value="watch">Watch</option>
+              <option value="retire">Retire</option>
+            </select>
+          </div>
+        </section>
+
+        <section class="live-snapshot" aria-label="Live registry snapshot">
+          <div class="snapshot-card">
+            <div class="snapshot-icon">
+              <svg viewBox="0 0 24 24"><path d="M12 3l8 4-8 4-8-4 8-4z"/><path d="M4 12l8 4 8-4"/><path d="M4 17l8 4 8-4"/></svg>
+            </div>
+            <div class="snapshot-copy"><strong id="snapshotProjects">6</strong><span>projects checked</span></div>
+          </div>
+          <div class="snapshot-card">
+            <div class="snapshot-icon online">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18"/><path d="M12 3a14 14 0 0 0 0 18"/></svg>
+            </div>
+            <div class="snapshot-copy"><strong id="snapshotWebsites">5</strong><span>websites live</span></div>
+          </div>
+          <div class="snapshot-card">
+            <div class="snapshot-icon online">
+              <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+            </div>
+            <div class="snapshot-copy"><strong id="snapshotHealth">1</strong><span>health endpoint live</span></div>
+          </div>
+          <div class="snapshot-card">
+            <div class="snapshot-icon offline">
+              <svg viewBox="0 0 24 24"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+            </div>
+            <div class="snapshot-copy"><strong id="snapshotUnreachable">1</strong><span>unreachable</span></div>
+          </div>
+          <div class="snapshot-card">
+            <div class="snapshot-icon">
+              <svg viewBox="0 0 24 24"><path d="M4 17l6-6-6-6"/><path d="M12 19h8"/></svg>
+            </div>
+            <div class="snapshot-copy"><strong id="snapshotMissing">4</strong><span>missing /api/health</span></div>
+          </div>
+        </section>
+
+        <section class="metrics" aria-label="Portfolio metrics">
+          <article class="metric">
+            <div class="metric-top">
+              <span>Total visits</span>
+              <svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 16l4-4 3 3 5-7"/></svg>
+            </div>
+            <div class="metric-value" id="totalVisits">0</div>
+            <div class="metric-foot">
+              <span id="visitorCount">0 visitors</span>
+              <span class="trend good" id="portfolioTrend">0%</span>
+            </div>
+          </article>
+
+          <article class="metric">
+            <div class="metric-top">
+              <span>Forecast revenue</span>
+              <svg viewBox="0 0 24 24"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+            <div class="metric-value" id="forecastRevenue">$0</div>
+            <div class="metric-foot">
+              <span id="forecastRpm">$0 RPM blend</span>
+              <span class="trend flat" id="forecastDelta">Scenario</span>
+            </div>
+          </article>
+
+          <article class="metric">
+            <div class="metric-top">
+              <span>Search impressions</span>
+              <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            </div>
+            <div class="metric-value" id="searchImpressions">0</div>
+            <div class="metric-foot">
+              <span id="organicShare">0% organic</span>
+              <span class="trend good" id="queryCount">0 queries</span>
+            </div>
+          </article>
+
+          <article class="metric">
+            <div class="metric-top">
+              <span>Live connections</span>
+              <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 8-6-16-3 8H2"/></svg>
+            </div>
+            <div class="metric-value" id="opsOnline">0/0</div>
+            <div class="metric-foot">
+              <span id="opsLatency">0ms avg</span>
+              <span class="trend good" id="opsIssues">Healthy</span>
+            </div>
+          </article>
+
+          <article class="metric">
+            <div class="metric-top">
+              <span>Attention today</span>
+              <svg viewBox="0 0 24 24"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+            </div>
+            <div class="metric-value" id="attentionCount">0</div>
+            <div class="metric-foot">
+              <span id="attentionTop">No blockers</span>
+              <span class="trend flat" id="attentionUrgency">Today</span>
+            </div>
+          </article>
+
+          <article class="metric">
+            <div class="metric-top">
+              <span>Momentum score</span>
+              <svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg>
+            </div>
+            <div class="metric-value" id="momentumAverage">0</div>
+            <div class="metric-foot">
+              <span id="momentumLeaders">0 growing</span>
+              <span class="trend good" id="momentumState">Stable</span>
+            </div>
+          </article>
+
+          <article class="metric">
+            <div class="metric-top">
+              <span>API requests</span>
+              <svg viewBox="0 0 24 24"><path d="M4 17l6-6-6-6"/><path d="M12 19h8"/></svg>
+            </div>
+            <div class="metric-value" id="apiRequests">0</div>
+            <div class="metric-foot">
+              <span id="apiCost">$0 cost</span>
+              <span class="trend flat" id="apiErrors">0% errors</span>
+            </div>
+          </article>
+
+          <article class="metric">
+            <div class="metric-top">
+              <span>Retire candidates</span>
+              <svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>
+            </div>
+            <div class="metric-value" id="retireCount">0</div>
+            <div class="metric-foot">
+              <span id="retireVisits">0 visits at risk</span>
+              <span class="trend bad" id="retireSavings">Review</span>
+            </div>
+          </article>
+        </section>
+
+        <section class="attention-grid" id="today">
+          <article class="panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <h2>Attention Today</h2>
+                <span id="attentionCaption">The highest leverage actions for this portfolio</span>
+              </div>
+              <button class="button ghost" id="refreshBriefingButton">
+                <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+                Brief
+              </button>
+            </div>
+            <div class="panel-body">
+              <div class="attention-list" id="attentionList"></div>
+            </div>
+          </article>
+
+          <div class="detail-stack">
+            <article class="panel">
+              <div class="panel-header">
+                <div class="panel-title">
+                  <h2>Founder briefing</h2>
+                  <span>Generated from current project signals</span>
+                </div>
+              </div>
+              <div class="panel-body briefing">
+                <div class="briefing-card">
+                  <h3>Today</h3>
+                  <p id="founderBriefing">No briefing yet.</p>
+                </div>
+                <div class="momentum-summary" id="momentumSummary"></div>
+              </div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-header">
+                <div class="panel-title">
+                  <h2>Momentum board</h2>
+                  <span>Which projects are growing, drifting, or need rescue</span>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table class="momentum-table">
+                  <thead>
+                    <tr>
+                      <th>Project</th>
+                      <th>Score</th>
+                      <th>Momentum</th>
+                      <th>Why</th>
+                    </tr>
+                  </thead>
+                  <tbody id="momentumTable"></tbody>
+                </table>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="grid">
+          <article class="panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <h2>Portfolio</h2>
+                <span id="portfolioCaption">Sorted by visits</span>
+              </div>
+              <button class="button ghost" id="sortButton">
+                <svg viewBox="0 0 24 24"><path d="M3 7h18"/><path d="M6 12h12"/><path d="M10 17h4"/></svg>
+                Sort
+              </button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Site</th>
+                    <th>Visits</th>
+                    <th>Trend</th>
+                    <th>Organic</th>
+                    <th>Bounce</th>
+                    <th>Momentum</th>
+                    <th>Revenue</th>
+                    <th>Status</th>
+                    <th>30d spark</th>
+                  </tr>
+                </thead>
+                <tbody id="siteTable"></tbody>
+              </table>
+            </div>
+          </article>
+
+          <div class="detail-stack">
+            <article class="panel">
+              <div class="panel-header">
+                <div class="panel-title">
+                  <h2>Selected site</h2>
+                  <span id="selectedDomain">-</span>
+                </div>
+                <span class="pill keep" id="selectedStatus">Keep</span>
+              </div>
+              <div class="panel-body selected-site" id="selectedSite"></div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-header">
+                <div class="panel-title">
+                  <h2>Traffic sources</h2>
+                  <span id="sourceCaption">Selected site source mix</span>
+                </div>
+              </div>
+              <div class="panel-body" id="sourcePanel"></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="grid">
+          <article class="panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <h2>Behavior signals</h2>
+                <span>Engagement, intent, and quality flags</span>
+              </div>
+            </div>
+            <div class="panel-body">
+              <div class="mini-grid" id="behaviorStats"></div>
+              <div class="insights" id="insights"></div>
+            </div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <h2>Connection map</h2>
+                <span>Visitor location mix</span>
+              </div>
+            </div>
+            <div class="panel-body">
+              <div class="bars" id="geoBars"></div>
+            </div>
+          </article>
+        </section>
+
+        <section class="ops-grid" id="ops">
+          <article class="panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <h2>Live Ops</h2>
+                <span id="opsCaption">Connections, syncs, deploys, uptime, and incidents</span>
+              </div>
+              <button class="button ghost" id="checkConnectionsButton">
+                <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+                Check
+              </button>
+            </div>
+            <div class="panel-body">
+              <div class="ops-summary" id="opsSummary"></div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Project</th>
+                      <th>Website</th>
+                      <th>API</th>
+                      <th>Analytics</th>
+                      <th>Last sync</th>
+                      <th>Latency</th>
+                      <th>Uptime</th>
+                      <th>Deploy</th>
+                    </tr>
+                  </thead>
+                  <tbody id="opsTable"></tbody>
+                </table>
+              </div>
+            </div>
+          </article>
+
+          <div class="detail-stack">
+            <article class="panel">
+              <div class="panel-header">
+                <div class="panel-title">
+                  <h2>API Usage</h2>
+                  <span id="selectedApiCaption">Selected site endpoints</span>
+                </div>
+              </div>
+              <div class="panel-body">
+                <div class="api-total" id="apiTotal"></div>
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Endpoint</th>
+                        <th>Requests</th>
+                        <th>Errors</th>
+                        <th>p95</th>
+                        <th>Cost</th>
+                        <th>Signal</th>
+                      </tr>
+                    </thead>
+                    <tbody id="endpointTable"></tbody>
+                  </table>
+                </div>
+              </div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-header">
+                <div class="panel-title">
+                  <h2>Consumers</h2>
+                  <span>API keys, apps, and external users</span>
+                </div>
+              </div>
+              <div class="panel-body">
+                <div class="bars" id="apiConsumers"></div>
+              </div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-header">
+                <div class="panel-title">
+                  <h2>Incident feed</h2>
+                  <span>What needs attention first</span>
+                </div>
+              </div>
+              <div class="panel-body">
+                <div class="incident-feed" id="incidentFeed"></div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="panel" id="connect">
+          <div class="panel-header">
+            <div class="panel-title">
+              <h2>Connected projects</h2>
+              <span id="connectCaption">Registry, health targets, analytics, search, deploy, and API wiring</span>
+            </div>
+            <div class="panel-actions">
+              <button class="button ghost" id="reloadRegistryButton">
+                <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+                Registry
+              </button>
+              <button class="button primary" id="runUptimeButton">
+                <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 8-6-16-3 8H2"/></svg>
+                Uptime
+              </button>
+              <button class="button ghost" id="copyRegistryButton">
+                <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><rect x="2" y="2" width="13" height="13" rx="2"/></svg>
+                Copy
+              </button>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="registry-strip" id="registryStatusStrip"></div>
+            <div class="connector-overview" id="connectorOverview"></div>
+            <div class="connector-grid">
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Project</th>
+                      <th>Purpose</th>
+                      <th>Website</th>
+                      <th>/api/health</th>
+                      <th>Status</th>
+                      <th>Last checked</th>
+                    </tr>
+                  </thead>
+                  <tbody id="connectorTable"></tbody>
+                </table>
+              </div>
+              <div class="detail-stack">
+                <article class="connector-card">
+                  <div class="connector-card-head">
+                    <div>
+                      <strong id="connectorSelectedTitle">Selected project</strong>
+                      <p class="muted" id="connectorSelectedDomain">-</p>
+                    </div>
+                    <span class="pill online" id="connectorSelectedStatus">Ready</span>
+                  </div>
+                  <div class="connector-stack" id="connectorSelectedStack"></div>
+                </article>
+
+                <article class="connector-card">
+                  <div class="connector-card-head">
+                    <div>
+                      <strong>Connection kit</strong>
+                      <p class="muted">Drop these into each project as we wire them.</p>
+                    </div>
+                  </div>
+                  <code class="code-snippet" id="connectionSnippet"></code>
+                </article>
+
+                <article class="connector-card">
+                  <div class="connector-card-head">
+                    <div>
+                      <strong>Next connections</strong>
+                      <p class="muted">Highest leverage work from current status.</p>
+                    </div>
+                  </div>
+                  <div class="next-steps" id="connectionNextSteps"></div>
+                </article>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="truth-grid" aria-label="Prototype truth and roadmap">
+          <article class="panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <h2>Real today vs next connections</h2>
+                <span>What is live now, and what still needs a data connector</span>
+              </div>
+            </div>
+            <div class="panel-body truth-columns">
+              <div class="truth-list">
+                <h3>Real today <span class="status-dot online"></span></h3>
+                <ul>
+                  <li><span class="check-dot real">+</span>Project registry file</li>
+                  <li><span class="check-dot real">+</span>Live uptime checker</li>
+                  <li><span class="check-dot real">+</span>Website response checks</li>
+                  <li><span class="check-dot real">+</span>Health endpoint checks</li>
+                  <li><span class="check-dot real">+</span>Local API server</li>
+                  <li><span class="check-dot real">+</span>Latest uptime status</li>
+                </ul>
+              </div>
+              <div class="truth-list">
+                <h3>Needs connector <span class="status-dot degraded"></span></h3>
+                <ul>
+                  <li><span class="check-dot pending">!</span>Traffic analytics feed</li>
+                  <li><span class="check-dot pending">!</span>Visitor geography feed</li>
+                  <li><span class="check-dot pending">!</span>Search Console feed</li>
+                  <li><span class="check-dot pending">!</span>Revenue source</li>
+                  <li><span class="check-dot pending">!</span>API usage feed</li>
+                  <li><span class="check-dot pending">!</span>Deployment provider feed</li>
+                </ul>
+              </div>
+            </div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <h2>Recommended next milestones</h2>
+                <span>The highest leverage pieces to make the cockpit fully live</span>
+              </div>
+            </div>
+            <div class="panel-body">
+              <ol class="milestone-list">
+                <li><span class="number-dot">1</span>Add `/api/health` to all projects</li>
+                <li><span class="number-dot">2</span>Connect analytics</li>
+                <li><span class="number-dot">3</span>Connect Search Console</li>
+                <li><span class="number-dot">4</span>Add API usage reporting</li>
+                <li><span class="number-dot">5</span>Add production deployment links</li>
+                <li><span class="number-dot">6</span>Add deployment checks</li>
+                <li><span class="number-dot">7</span>Add daily AI briefing</li>
+                <li><span class="number-dot">8</span>Add project notes and ownership</li>
+                <li><span class="number-dot">9</span>Add retirement archive history</li>
+                <li><span class="number-dot">10</span>Seed the future SaaS version</li>
+              </ol>
+            </div>
+          </article>
+        </section>
+
+        <section class="panel" id="search">
+          <div class="panel-header">
+            <div class="panel-title">
+              <h2>Search engine intelligence</h2>
+              <span>Queries, impressions, clicks, CTR, and average position</span>
+            </div>
+            <div class="select-wrap">
+              <select id="engineFilter" aria-label="Search engine filter">
+                <option value="all">All engines</option>
+                <option value="Google">Google</option>
+                <option value="Bing">Bing</option>
+                <option value="DuckDuckGo">DuckDuckGo</option>
+                <option value="Perplexity">Perplexity</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table class="query-table">
+              <thead>
+                <tr>
+                  <th>Query</th>
+                  <th>Site</th>
+                  <th>Engine</th>
+                  <th>Clicks</th>
+                  <th>Impressions</th>
+                  <th>CTR</th>
+                  <th>Avg pos</th>
+                  <th>Signal</th>
+                </tr>
+              </thead>
+              <tbody id="queryTable"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel" id="forecast">
+          <div class="panel-header">
+            <div class="panel-title">
+              <h2>Ad revenue forecast</h2>
+              <span>Visits, page depth, ad density, fill, viewability, and RPM</span>
+            </div>
+            <button class="button ghost" id="useSelectedButton">
+              <svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/><path d="M7 12h10"/></svg>
+              Use selected
+            </button>
+          </div>
+          <div class="panel-body calculator">
+            <div class="controls" id="calcControls"></div>
+            <aside class="forecast-card">
+              <div class="forecast-main">
+                <span>Monthly estimate</span>
+                <strong id="calcRevenue">$0</strong>
+              </div>
+              <div class="forecast-breakdown">
+                <div><span>Monthly impressions</span><strong id="calcImpressions">0</strong></div>
+                <div><span>Revenue per visit</span><strong id="calcRpv">$0.00</strong></div>
+                <div><span>Annual run rate</span><strong id="calcAnnual">$0</strong></div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="panel" id="retire">
+          <div class="panel-header">
+            <div class="panel-title">
+              <h2>Retirement queue</h2>
+              <span>Low-traffic projects and suggested next moves</span>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="retire-grid" id="retireGrid"></div>
+          </div>
+        </section>
+      </main>
+    </section>
+  </div>
+
+  <dialog id="siteDialog">
+    <form method="dialog" id="siteForm">
+      <div class="dialog-header">
+        <div>
+          <h2>Add site</h2>
+          <p class="muted">New entries stay in this dashboard session.</p>
+        </div>
+        <button type="button" class="icon-button" id="closeSiteDialog" value="cancel" aria-label="Close" title="Close" style="color:var(--ink);border-color:var(--line);background:#fff;">
+          <svg viewBox="0 0 24 24"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="dialog-body">
+        <div class="form-grid">
+          <div class="field">
+            <label for="newName">Name</label>
+            <input id="newName" required placeholder="Example Site">
+          </div>
+          <div class="field">
+            <label for="newDomain">Domain</label>
+            <input id="newDomain" required placeholder="example.com">
+          </div>
+          <div class="field">
+            <label for="newCategory">Category</label>
+            <select id="newCategory">
+              <option>Tool</option>
+              <option>Directory</option>
+              <option>Content</option>
+              <option>Experiment</option>
+              <option>SaaS</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="newVisits">30d visits</label>
+            <input id="newVisits" type="number" min="0" value="1000">
+          </div>
+          <div class="field">
+            <label for="newOrganic">Organic share %</label>
+            <input id="newOrganic" type="number" min="0" max="100" value="42">
+          </div>
+          <div class="field">
+            <label for="newRpm">Ad RPM</label>
+            <input id="newRpm" type="number" min="0" step="0.5" value="8">
+          </div>
+        </div>
+      </div>
+      <div class="dialog-footer">
+        <button type="button" class="button" id="cancelSiteButton" value="cancel">Cancel</button>
+        <button type="submit" class="button primary" id="saveSiteButton" value="default">Add site</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const colors = ["#2f8f70", "#2c6fbb", "#c98b2c", "#7251a3", "#25818a", "#c65252", "#5e7d39"];
+    const sourceColors = {
+      Organic: "#2f8f70",
+      Direct: "#2c6fbb",
+      Referral: "#c98b2c",
+      Social: "#7251a3",
+      Paid: "#c65252"
+    };
+
+    let sites = [
+      { id: "buildbearing", name: "command.centre", domain: "buildbearing.com", internal: true },
+      { id: "voynichtech", name: "VoynichTech", domain: "voynichtech.ca" },
+      { id: "matchseer", name: "MatchSeer", domain: "matchseer.ca" },
+      { id: "niftytoolshub", name: "NiftyToolsHub", domain: "niftytoolshub.com" },
+      { id: "chronovisorai", name: "ChronovisorAI", domain: "chronovisorai.com" },
+      { id: "vertmex", name: "Vertmex", domain: "vertmex.com" },
+      { id: "keyscout", name: "KeyScout", domain: "keyscout.app" }
+    ];
+
+    const opsApiData = {};
+
+    let connectorRegistry = {
+      buildbearing: {
+        website: { status: "connected", url: "https://www.buildbearing.com/" },
+        health: { status: "missing", url: "https://www.buildbearing.com/api/health", note: "returned 404" },
+        apiBase: { status: "planned", url: "https://www.buildbearing.com/api" },
+        analytics: { status: "private", provider: "internal only" },
+        search: { status: "noindex", provider: "robots noindex" },
+        deploy: { status: "pending", provider: "Vercel/Cloudflare TBD" },
+        auth: { status: "planned", provider: "server-side password gate" }
+      },
+      voynichtech: {
+        website: { status: "connected", url: "https://voynichtech.ca/" },
+        health: { status: "missing", url: "https://voynichtech.ca/api/health", note: "returned 404" },
+        apiBase: { status: "planned", url: "https://voynichtech.ca/api" },
+        analytics: { status: "pending", provider: "GA4/Vercel Analytics" },
+        search: { status: "pending", provider: "Google Search Console" },
+        deploy: { status: "pending", provider: "Vercel project link" },
+        auth: { status: "manual", provider: "public site" }
+      },
+      matchseer: {
+        website: { status: "unreachable", url: "https://matchseer.ca/", note: "curl returned 000" },
+        health: { status: "unreachable", url: "https://matchseer.ca/api/health", note: "curl returned 000" },
+        apiBase: { status: "planned", url: "https://matchseer.ca/api" },
+        analytics: { status: "pending", provider: "GA4/Vercel Analytics" },
+        search: { status: "pending", provider: "Google Search Console" },
+        deploy: { status: "pending", provider: "Vercel project link" },
+        auth: { status: "manual", provider: "public site" }
+      },
+      niftytoolshub: {
+        website: { status: "connected", url: "https://niftytoolshub.com/" },
+        health: { status: "missing", url: "https://niftytoolshub.com/api/health", note: "returned 404" },
+        apiBase: { status: "planned", url: "https://niftytoolshub.com/api" },
+        analytics: { status: "pending", provider: "GA4/Vercel Analytics" },
+        search: { status: "pending", provider: "Google Search Console" },
+        deploy: { status: "pending", provider: "Vercel project link" },
+        auth: { status: "manual", provider: "public site" }
+      },
+      chronovisorai: {
+        website: { status: "connected", url: "https://chronovisorai.com/" },
+        health: { status: "connected", url: "https://chronovisorai.com/api/health" },
+        apiBase: { status: "connected", url: "https://chronovisorai.com/api" },
+        analytics: { status: "pending", provider: "GA4/Vercel Analytics" },
+        search: { status: "pending", provider: "Google Search Console" },
+        deploy: { status: "pending", provider: "Vercel project link" },
+        auth: { status: "manual", provider: "public site" }
+      },
+      vertmex: {
+        website: { status: "planned", url: "https://vertmex.com/" },
+        health: { status: "planned", url: "https://vertmex.com/api/health" },
+        apiBase: { status: "planned", url: "https://vertmex.com/api" },
+        analytics: { status: "pending", provider: "GA4/Vercel Analytics" },
+        search: { status: "pending", provider: "Google Search Console" },
+        deploy: { status: "pending", provider: "Vercel project link" },
+        auth: { status: "manual", provider: "public site" }
+      },
+      keyscout: {
+        website: { status: "connected", url: "https://keyscout.app/" },
+        health: { status: "missing", url: "https://keyscout.app/api/health", note: "returned 404" },
+        apiBase: { status: "planned", url: "https://keyscout.app/api" },
+        analytics: { status: "pending", provider: "GA4/Vercel Analytics" },
+        search: { status: "pending", provider: "Google Search Console" },
+        deploy: { status: "pending", provider: "Vercel project link" },
+        auth: { status: "manual", provider: "public site" }
+      }
+    };
+
+    function defaultConnectors(site) {
+      return {
+        website: { status: "planned", url: `https://${site.domain}/` },
+        health: { status: "planned", url: `https://${site.domain}/api/health` },
+        apiBase: { status: site.api?.totalRequests ? "planned" : "idle", url: `https://${site.domain}/api` },
+        analytics: { status: "pending", provider: "analytics connector" },
+        search: { status: "pending", provider: "search console" },
+        deploy: { status: "pending", provider: "deploy provider" },
+        auth: { status: site.internal ? "planned" : "manual", provider: site.internal ? "server auth" : "public site" }
+      };
+    }
+
+    const registryState = {
+      source: "Registry seed",
+      registryLoadedAt: null,
+      liveCheckedAt: null,
+      uptimeSource: "Not checked",
+      liveCheckSupported: ["http:", "https:"].includes(location.protocol),
+      checking: false,
+      message: "Open through the local command centre server for live checks."
+    };
+
+    let liveUptimeReport = null;
+
+    function enrichSiteWithConnections(site) {
+      const opsApi = site.telemetry?.apiUsage === "connected" ? (opsApiData[site.id] || {}) : {};
+      const enriched = {
+        ...site,
+        ...opsApi,
+        ops: { ...(opsApi.ops || {}), ...(site.ops || {}) },
+        api: { ...(opsApi.api || {}), ...(site.api || {}) }
+      };
+      const registryEntry = connectorRegistry[site.id];
+      const connectors = registryEntry || site.connectors || defaultConnectors(enriched);
+      return {
+        ...enriched,
+        registryProject: Boolean(registryEntry) || Boolean(site.registryProject),
+        connectors
+      };
+    }
+
+    function siteFromRegistrySeed(site) {
+      return createSiteFromRegistry({
+        id: site.id,
+        name: site.name,
+        domain: site.domain,
+        role: site.internal ? "private_command_centre" : "public_site"
+      });
+    }
+
+    sites = sites
+      .filter((site) => Object.prototype.hasOwnProperty.call(connectorRegistry, site.id))
+      .map((site) => enrichSiteWithConnections(siteFromRegistrySeed(site)));
+
+    const state = {
+      windowDays: 30,
+      selectedId: "buildbearing",
+      filter: "all",
+      search: "",
+      engine: "all",
+      sort: "visits",
+      calculator: {
+        visits: 25000,
+        pages: 2.4,
+        slots: 3,
+        fill: 82,
+        viewability: 68,
+        rpm: 9.5
+      }
+    };
+
+    const $ = (selector) => document.querySelector(selector);
+
+    const formatNumber = (value) => new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(value || 0);
+    const formatMoney = (value, compact = false) => new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      notation: compact ? "compact" : "standard",
+      maximumFractionDigits: value >= 1000 || compact ? 0 : 2
+    }).format(value || 0);
+
+    function isHostedMode() {
+      return ["http:", "https:"].includes(location.protocol);
+    }
+
+    function normalizeRegistryRows(payload) {
+      if (Array.isArray(payload)) return payload;
+      if (Array.isArray(payload?.projects)) return payload.projects;
+      return [];
+    }
+
+    function registryRowsToMap(rows) {
+      return rows.reduce((map, project) => {
+        if (project?.id && project.connectors) map[project.id] = project.connectors;
+        return map;
+      }, {});
+    }
+
+    function categoryFromRole(role) {
+      if (role === "private_command_centre") return "Internal";
+      if (role === "public_site") return "Site";
+      return "Tool";
+    }
+
+    function createSiteFromRegistry(project) {
+      const internal = project.role === "private_command_centre";
+      return {
+        id: project.id,
+        name: project.name,
+        domain: project.domain,
+        category: categoryFromRole(project.role),
+        status: internal ? "keep" : "watch",
+        internal,
+        visits: 0,
+        visitors: 0,
+        trend: 0,
+        organic: 0,
+        bounce: 0,
+        avgSession: 0,
+        pagesPerVisit: 1,
+        adRpm: 0,
+        fillRate: 0,
+        viewability: 0,
+        conversion: 0,
+        searchImpressions: 0,
+        queries: [],
+        sources: { Organic: 0, Direct: 0, Referral: 0, Social: 0, Paid: 0 },
+        countries: { Other: 100 },
+        spark: Array.from({ length: 12 }, () => 0),
+        telemetry: {
+          traffic: "not_connected",
+          geography: "not_connected",
+          search: "not_connected",
+          revenue: "not_connected",
+          apiUsage: "not_connected"
+        },
+        ops: {
+          web: "offline",
+          api: "idle",
+          analytics: "pending",
+          syncMinutes: 0,
+          lastSync: "not connected",
+          latency: 0,
+          uptime: 0,
+          sslDays: null,
+          deploy: "unlinked",
+          lastChecked: "not checked",
+          incident: "Waiting for live registry check"
+        },
+        api: {
+          totalRequests: 0,
+          errorRate: 0,
+          p95: 0,
+          cost: 0,
+          keys: 0,
+          authFailures: 0,
+          rateLimited: 0,
+          endpoints: [],
+          consumers: []
+        }
+      };
+    }
+
+    function applyProjectRegistry(payload, sourceLabel = "connection-registry.json") {
+      const rows = normalizeRegistryRows(payload);
+      if (!rows.length) return false;
+      connectorRegistry = registryRowsToMap(rows);
+      const existingById = new Map(sites.map((site) => [site.id, site]));
+      sites = rows.map((project) => {
+        const existing = existingById.get(project.id);
+        const site = createSiteFromRegistry(project);
+        if (existing?.status) site.status = existing.status;
+        return site;
+      });
+      sites = sites.map((site) => enrichSiteWithConnections(site));
+      registryState.source = sourceLabel;
+      registryState.registryLoadedAt = new Date().toISOString();
+      registryState.message = "Registry loaded from file.";
+      if (liveUptimeReport) applyLiveUptimeReport(liveUptimeReport, false);
+      return true;
+    }
+
+    function statusToOps(kind, status) {
+      if (["connected", "protected", "private", "manual", "noindex"].includes(status)) return "online";
+      if (["missing", "pending", "planned", "idle"].includes(status)) return kind === "health" ? "idle" : "pending";
+      if (["degraded", "stale"].includes(status)) return "degraded";
+      return "offline";
+    }
+
+    function liveIncidentFor(website, health) {
+      if (website.status === "unreachable") return "Website did not respond";
+      if (["degraded", "error", "missing"].includes(website.status)) return `Website ${website.note || website.status}`;
+      if (health.status === "unreachable") return "Health endpoint unreachable";
+      if (health.status === "missing") return "Health endpoint missing";
+      if (health.status === "protected") return "Health endpoint protected";
+      if (health.status === "connected") return "Live check healthy";
+      return "Live check completed";
+    }
+
+    function applyLiveUptimeReport(report, updateState = true) {
+      if (!report?.projects?.length) return false;
+      liveUptimeReport = report;
+      if (updateState) {
+        registryState.liveCheckedAt = report.checkedAt;
+        registryState.uptimeSource = "Live uptime check";
+        registryState.message = `${report.summary.websitesConnected}/${report.summary.total} websites responded.`;
+      }
+      report.projects.forEach((project) => {
+        const site = sites.find((item) => item.id === project.id);
+        if (!site) return;
+        const connectors = site.connectors || defaultConnectors(site);
+        const website = project.website || {};
+        const health = project.health || {};
+        if (website.status) {
+          connectors.website = {
+            ...connectors.website,
+            status: website.status,
+            url: website.url || connectors.website?.url,
+            finalUrl: website.finalUrl,
+            note: website.note,
+            statusCode: website.statusCode,
+            responseMs: website.responseTimeMs,
+            sslDays: website.sslDays,
+            lastChecked: report.checkedAt
+          };
+        }
+        if (health.status) {
+          connectors.health = {
+            ...connectors.health,
+            status: health.status,
+            url: health.url || connectors.health?.url,
+            finalUrl: health.finalUrl,
+            note: health.note,
+            statusCode: health.statusCode,
+            responseMs: health.responseTimeMs,
+            lastChecked: report.checkedAt
+          };
+        }
+        site.connectors = connectors;
+        site.ops = site.ops || {};
+        site.ops.web = statusToOps("website", connectors.website.status);
+        site.ops.api = statusToOps("health", connectors.health.status);
+        site.ops.analytics = statusToOps("analytics", connectors.analytics?.status);
+        site.ops.latency = website.responseTimeMs || site.ops.latency || 0;
+        site.ops.sslDays = website.sslDays ?? site.ops.sslDays ?? 0;
+        site.ops.lastChecked = report.checkedAt ? "live" : site.ops.lastChecked;
+        site.ops.syncMinutes = site.ops.analytics === "online" && report.checkedAt
+          ? Math.max(0, Math.round((Date.now() - new Date(report.checkedAt).getTime()) / 60000))
+          : 0;
+        site.ops.lastSync = site.ops.analytics === "online" ? shortTime(report.checkedAt) : "not connected";
+        if (connectors.website.status === "unreachable") site.ops.uptime = 0;
+        if (["connected", "protected"].includes(connectors.website.status)) site.ops.uptime = 100;
+        site.ops.incident = liveIncidentFor(connectors.website, connectors.health);
+      });
+      return true;
+    }
+
+    async function loadProjectRegistry(showToast = false) {
+      if (!isHostedMode()) {
+        registryState.message = "Using embedded seed. Open the local server for the live registry.";
+        if (showToast) toast("Open the local command centre server to load the registry file.");
+        return false;
+      }
+      try {
+        const response = await fetch(`/api/registry?ts=${Date.now()}`, { cache: "no-store" });
+        if (!response.ok) throw new Error(`registry ${response.status}`);
+        const payload = await response.json();
+        const loaded = applyProjectRegistry(payload);
+        if (loaded && showToast) toast("Project registry loaded.");
+        render();
+        return loaded;
+      } catch (error) {
+        registryState.message = "Using embedded seed. Registry API is unavailable.";
+        if (showToast) toast("Registry API is not available on this server.");
+        renderConnectors();
+        return false;
+      }
+    }
+
+    async function loadLiveUptimeReport(showToast = false) {
+      if (!isHostedMode()) return false;
+      try {
+        const response = await fetch(`/api/uptime-status?ts=${Date.now()}`, { cache: "no-store" });
+        if (!response.ok) throw new Error(`uptime ${response.status}`);
+        const report = await response.json();
+        if (!report?.projects?.length) return false;
+        applyLiveUptimeReport(report);
+        if (showToast) toast("Latest uptime report loaded.");
+        render();
+        return true;
+      } catch (error) {
+        registryState.uptimeSource = "No uptime report";
+        registryState.message = "Run uptime to create a fresh heartbeat.";
+        renderConnectors();
+        return false;
+      }
+    }
+
+    async function runLiveUptimeChecks() {
+      if (!isHostedMode()) {
+        toast("Open the local command centre server to run live checks.");
+        return false;
+      }
+      registryState.checking = true;
+      registryState.message = "Checking live domains now...";
+      renderConnectors();
+      try {
+        const response = await fetch("/api/check-uptime", { method: "POST" });
+        if (!response.ok) throw new Error(`uptime ${response.status}`);
+        const report = await response.json();
+        applyLiveUptimeReport(report);
+        toast("Live uptime refreshed.");
+        return true;
+      } catch (error) {
+        registryState.message = "Live uptime needs the command centre server.";
+        toast("Live uptime API is not available here.");
+        return false;
+      } finally {
+        registryState.checking = false;
+        render();
+      }
+    }
+
+    function shortTime(iso) {
+      if (!iso) return "Not yet";
+      const minutes = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
+      if (minutes < 1) return "just now";
+      if (minutes < 60) return `${minutes}m ago`;
+      const hours = Math.round(minutes / 60);
+      if (hours < 24) return `${hours}h ago`;
+      return `${Math.round(hours / 24)}d ago`;
+    }
+
+    function setText(selector, value) {
+      const el = $(selector);
+      if (el) el.textContent = value;
+    }
+
+    function registryProjects() {
+      return sites.filter((site) => site.registryProject);
+    }
+
+    function liveSnapshotSummary() {
+      const registry = registryProjects();
+      if (liveUptimeReport?.summary?.total) return liveUptimeReport.summary;
+      return {
+        total: registry.length,
+        websitesConnected: registry.filter((site) => ["connected", "protected"].includes(site.connectors?.website?.status)).length,
+        healthConnected: registry.filter((site) => ["connected", "protected"].includes(site.connectors?.health?.status)).length,
+        unreachable: registry.filter((site) => site.connectors?.website?.status === "unreachable" || site.connectors?.health?.status === "unreachable").length,
+        missingHealth: registry.filter((site) => site.connectors?.health?.status === "missing").length,
+        degraded: registry.filter((site) => ["degraded", "error"].includes(site.connectors?.website?.status) || ["degraded", "error"].includes(site.connectors?.health?.status)).length
+      };
+    }
+
+    function renderLiveSnapshot() {
+      const summary = liveSnapshotSummary();
+      const checked = shortTime(registryState.liveCheckedAt);
+      [
+        ["#snapshotProjects", summary.total],
+        ["#snapshotWebsites", summary.websitesConnected],
+        ["#snapshotHealth", summary.healthConnected],
+        ["#snapshotUnreachable", summary.unreachable],
+        ["#snapshotMissing", summary.missingHealth],
+        ["#gateProjects", summary.total],
+        ["#gateWebsites", summary.websitesConnected],
+        ["#gateHealth", summary.healthConnected],
+        ["#gateUnreachable", summary.unreachable],
+        ["#gateMissing", summary.missingHealth],
+        ["#gatePreviewProjects", summary.total],
+        ["#gatePreviewWebsites", summary.websitesConnected],
+        ["#gatePreviewHealth", summary.healthConnected],
+        ["#gatePreviewUnreachable", summary.unreachable],
+        ["#gatePreviewMissing", summary.missingHealth]
+      ].forEach(([selector, value]) => setText(selector, value));
+      setText("#gateChecked", `Last checked: ${checked}`);
+    }
+
+    function attentionSeverity(priority) {
+      if (priority >= 82) return { label: "High", tone: "high" };
+      if (priority >= 62) return { label: "Medium", tone: "medium" };
+      return { label: "Low", tone: "low" };
+    }
+
+    function projectPurpose(site) {
+      if (site.registryRole === "private_command_centre" || site.internal) return "Private command centre host";
+      if (site.registryRole === "public_site") return "Public site";
+      return site.category || "Project";
+    }
+
+    function connectorOverallStatus(connectors) {
+      if (connectors.website?.status === "unreachable") return { label: "Unreachable", status: "unreachable" };
+      if (connectors.health?.status === "unreachable") return { label: "Health unreachable", status: "unreachable" };
+      if (connectors.health?.status === "missing") return { label: "Missing /api/health", status: "missing" };
+      if (["connected", "protected"].includes(connectors.health?.status)) return { label: "/api/health live", status: "connected" };
+      if (connectors.analytics?.status === "pending" || connectors.search?.status === "pending") return { label: "Setup pending", status: "pending" };
+      return { label: "Connected", status: "connected" };
+    }
+
+    function connectionLastChecked(site) {
+      const connectors = site.connectors || {};
+      return connectors.website?.lastChecked || connectors.health?.lastChecked || registryState.liveCheckedAt || null;
+    }
+
+    function scaled(site, key) {
+      const factor = state.windowDays / 30;
+      return Math.round((site[key] || 0) * factor);
+    }
+
+    function hasTrafficData(site) {
+      return ["connected", "manual"].includes(site.telemetry?.traffic);
+    }
+
+    function hasSearchData(site) {
+      return ["connected", "manual"].includes(site.telemetry?.search);
+    }
+
+    function hasRevenueInputs(site) {
+      return ["connected", "manual"].includes(site.telemetry?.revenue) && hasTrafficData(site);
+    }
+
+    function hasApiUsageData(site) {
+      return ["connected", "manual"].includes(site.telemetry?.apiUsage);
+    }
+
+    function hasGeoData(site) {
+      return ["connected", "manual"].includes(site.telemetry?.geography);
+    }
+
+    function mutedText(text) {
+      return `<span class="muted">${text}</span>`;
+    }
+
+    function revenueFor(site) {
+      if (!hasRevenueInputs(site)) return 0;
+      const impressions = scaled(site, "visits") * site.pagesPerVisit * 3 * (site.fillRate / 100) * (site.viewability / 100);
+      return impressions * (site.adRpm / 1000);
+    }
+
+    function portfolioSites() {
+      const term = state.search.trim().toLowerCase();
+      let list = sites.filter((site) => {
+        const matchesFilter = state.filter === "all" || site.status === state.filter;
+        const text = `${site.name} ${site.domain} ${site.category}`.toLowerCase();
+        return matchesFilter && (!term || text.includes(term));
+      });
+
+      list.sort((a, b) => {
+        if (state.sort === "status") return a.status.localeCompare(b.status) || b.visits - a.visits;
+        if (state.sort === "revenue") return revenueFor(b) - revenueFor(a);
+        if (state.sort === "trend") return b.trend - a.trend;
+        if (state.sort === "momentum") return momentumFor(b).score - momentumFor(a).score;
+        return b.visits - a.visits;
+      });
+
+      return list;
+    }
+
+    function allQueries() {
+      return sites.filter(hasSearchData).flatMap((site) => site.queries.map((q) => ({
+        siteId: site.id,
+        site: site.name,
+        query: q[0],
+        engine: q[1],
+        clicks: Math.round(q[2] * (state.windowDays / 30)),
+        impressions: Math.round(q[3] * (state.windowDays / 30)),
+        ctr: q[4],
+        position: q[5]
+      })));
+    }
+
+    function selectedSite() {
+      return sites.find((site) => site.id === state.selectedId) || sites[0];
+    }
+
+    function scaledApi(site, key) {
+      const factor = state.windowDays / 30;
+      const value = site.api?.[key] || 0;
+      return key === "cost" ? value * factor : Math.round(value * factor);
+    }
+
+    function allEndpoints() {
+      return sites.flatMap((site) => (site.api?.endpoints || []).map((endpoint) => ({
+        ...endpoint,
+        siteId: site.id,
+        site: site.name
+      })));
+    }
+
+    function allConsumers() {
+      return sites.flatMap((site) => (site.api?.consumers || []).map((consumer) => ({
+        ...consumer,
+        siteId: site.id,
+        site: site.name
+      })));
+    }
+
+    function connectionUnits(site) {
+      const units = [
+        { name: "Website", status: site.ops?.web || "offline" },
+        { name: "Health", status: site.ops?.api || "offline" }
+      ];
+      if (["connected", "private", "manual"].includes(site.connectors?.analytics?.status)) {
+        units.push({ name: "Analytics", status: site.ops?.analytics || "offline" });
+      }
+      return units;
+    }
+
+    function isConnectionOk(status) {
+      return status === "online" || status === "idle" || status === "pending";
+    }
+
+    function connectionIssueCount(site) {
+      return connectionUnits(site).filter((unit) => !isConnectionOk(unit.status)).length;
+    }
+
+    function opsHealthScore(site) {
+      const ops = site.ops || {};
+      let score = 100;
+      connectionUnits(site).forEach((unit) => {
+        if (unit.status === "degraded" || unit.status === "stale") score -= 18;
+        if (unit.status === "offline" || unit.status === "error") score -= 34;
+      });
+      if ((ops.latency || 0) > 700) score -= 14;
+      if (Number.isFinite(ops.sslDays) && ops.sslDays > 0 && ops.sslDays < 30) score -= 10;
+      return Math.max(0, Math.min(100, Math.round(score)));
+    }
+
+    function uptimeText(site) {
+      const ops = site.ops || {};
+      if (ops.web === "online") return "Live";
+      if (ops.web === "pending") return "Pending";
+      if (ops.web === "offline") return "Down";
+      return Number.isFinite(ops.uptime) ? `${ops.uptime.toFixed(2)}%` : "-";
+    }
+
+    function statusText(status) {
+      return status.charAt(0).toUpperCase() + status.slice(1);
+    }
+
+    function statusPill(status) {
+      return `<span class="pill ${status}">${statusText(status)}</span>`;
+    }
+
+    const connectorFields = ["website", "health", "apiBase", "analytics", "search", "deploy", "auth"];
+    const connectorLabels = {
+      website: "Website",
+      health: "Health",
+      apiBase: "API base",
+      analytics: "Analytics",
+      search: "Search",
+      deploy: "Deploy",
+      auth: "Auth"
+    };
+
+    function isConnectorComplete(status) {
+      return ["connected", "protected", "linked", "private", "noindex", "manual", "idle"].includes(status);
+    }
+
+    function connectorCompletion(site) {
+      const connectors = site.connectors || defaultConnectors(site);
+      const complete = connectorFields.filter((field) => isConnectorComplete(connectors[field]?.status)).length;
+      return Math.round((complete / connectorFields.length) * 100);
+    }
+
+    function connectorNeeds(site) {
+      const connectors = site.connectors || defaultConnectors(site);
+      return connectorFields
+        .filter((field) => !isConnectorComplete(connectors[field]?.status))
+        .map((field) => ({ field, ...connectors[field] }));
+    }
+
+    function connectorValue(connection) {
+      return connection?.url || connection?.provider || connection?.note || "-";
+    }
+
+    function connectionRegistryPayload() {
+      return sites.filter((site) => site.registryProject).map((site) => ({
+        id: site.id,
+        name: site.name,
+        domain: site.domain,
+        category: site.category,
+        connectors: site.connectors
+      }));
+    }
+
+    function endpointSignal(endpoint) {
+      if (!endpoint.requests) return "Idle";
+      if (endpoint.signal === "Fix now" || endpoint.errorRate >= 8 || endpoint.p95 >= 1000) return "Fix now";
+      if (endpoint.signal === "Slow" || endpoint.errorRate >= 3 || endpoint.p95 >= 650) return "Watch";
+      if (endpoint.cost >= 10 && endpoint.requests < 10000) return "Cost";
+      return endpoint.signal || "Stable";
+    }
+
+    function signalClass(signal) {
+      if (signal === "Fix now") return "offline";
+      if (signal === "Watch" || signal === "Slow" || signal === "Cost") return "degraded";
+      if (signal === "Idle") return "idle";
+      return "online";
+    }
+
+    const ACCESS_PASSWORD = "centre";
+
+    function unlockGate() {
+      document.body.classList.remove("locked");
+      $("#gatePassword").value = "";
+      $("#gateMessage").textContent = "";
+    }
+
+    function initializeGate() {
+      if (sessionStorage.getItem("command-centre-unlocked") === "yes") {
+        unlockGate();
+        return;
+      }
+      setTimeout(() => $("#gatePassword")?.focus(), 80);
+    }
+
+    function retirementScore(site) {
+      if (site.internal) return 0;
+      if (!hasTrafficData(site)) return site.status === "retire" ? 60 : 0;
+      let score = 0;
+      if (site.visits === 0) score += 55;
+      if (site.visits < 1500) score += 22;
+      if (site.trend < -10) score += 18;
+      if (site.searchImpressions < 1000) score += 18;
+      if (site.bounce > 65) score += 12;
+      if (revenueFor(site) < 10) score += 10;
+      return Math.min(100, score);
+    }
+
+    function healthScore(site) {
+      if (site.internal) {
+        const engagement = Math.min(25, site.pagesPerVisit * 4) + Math.min(15, site.avgSession / 60);
+        return Math.min(100, Math.round(opsHealthScore(site) * 0.75 + engagement));
+      }
+      if (!hasTrafficData(site)) {
+        return Math.round(opsHealthScore(site) * 0.7 + connectorCompletion(site) * 0.3);
+      }
+      const traffic = Math.min(35, site.visits / 850);
+      const search = Math.min(25, site.searchImpressions / 6000);
+      const trend = Math.max(0, Math.min(20, site.trend + 10));
+      const quality = Math.max(0, Math.min(20, 80 - site.bounce));
+      return Math.round(traffic + search + trend + quality);
+    }
+
+    function opportunitySignal(query) {
+      if (query.position >= 8 && query.position <= 20 && query.impressions > 7000) return "Content lift";
+      if (query.ctr < 2 && query.impressions > 8000) return "Title test";
+      if (query.position <= 5 && query.ctr > 4) return "Defend";
+      return "Monitor";
+    }
+
+    function clamp(value, min = 0, max = 100) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function momentumFor(site) {
+      const api = site.api || {};
+      const apiVolume = hasApiUsageData(site) && api.totalRequests ? Math.min(28, Math.log10(api.totalRequests) * 6) : 0;
+      const apiPenalty = hasApiUsageData(site) ? (api.errorRate || 0) * 5 + ((api.p95 || 0) > 800 ? 18 : 0) : 0;
+      const apiScore = hasApiUsageData(site) ? clamp(52 + apiVolume - apiPenalty) : 55;
+      const trendScore = hasTrafficData(site) ? (site.internal ? 78 : clamp(50 + site.trend * 1.35)) : 55;
+      const engagementScore = hasTrafficData(site) ? clamp(78 - site.bounce + site.pagesPerVisit * 8 + site.conversion * 3) : 55;
+      const connectionScore = site.registryProject ? connectorCompletion(site) : 55;
+      const score = Math.round(
+        trendScore * 0.24 +
+        opsHealthScore(site) * 0.22 +
+        healthScore(site) * 0.18 +
+        apiScore * 0.14 +
+        engagementScore * 0.12 +
+        connectionScore * 0.10
+      );
+
+      let label = "Stable";
+      let tone = "stable";
+      if (site.internal && score >= 70) {
+        label = "Private steady";
+        tone = "private";
+      } else if (retirementScore(site) >= 70 || site.status === "retire") {
+        label = "Retire";
+        tone = "retire";
+      } else if (score >= 80) {
+        label = "Growing";
+        tone = "growing";
+      } else if (score >= 62) {
+        label = "Stable";
+        tone = "stable";
+      } else if (score >= 44) {
+        label = "Drifting";
+        tone = "drifting";
+      } else {
+        label = "Needs rescue";
+        tone = "rescue";
+      }
+
+      const reasons = [];
+      if (site.internal) reasons.push("private ops host");
+      if (!hasTrafficData(site)) reasons.push("analytics pending");
+      if (!hasSearchData(site)) reasons.push("search pending");
+      if (!hasApiUsageData(site)) reasons.push("API usage pending");
+      if (hasTrafficData(site) && site.trend > 15) reasons.push("traffic up");
+      if (hasTrafficData(site) && site.trend < -8) reasons.push("traffic down");
+      if (connectionIssueCount(site) > 0) reasons.push("ops issue");
+      if (site.registryProject && connectorNeeds(site).length) reasons.push("setup missing");
+      if (hasApiUsageData(site) && (api.errorRate || 0) > 5) reasons.push("API errors");
+      if (hasApiUsageData(site) && (api.p95 || 0) > 800) reasons.push("slow API");
+      if (hasTrafficData(site) && !site.internal && site.visits < 1500) reasons.push("low traffic");
+      if (!reasons.length) reasons.push("steady signals");
+
+      return { score: clamp(score), label, tone, reasons };
+    }
+
+    function attentionItems(visible = portfolioSites()) {
+      const items = [];
+      visible.forEach((site) => {
+        const api = site.api || {};
+        const ops = site.ops || {};
+        const needs = connectorNeeds(site);
+        const add = (priority, type, title, detail, action) => {
+          items.push({ site, priority, type, title, detail, action });
+        };
+
+        if (site.connectors?.website?.status === "unreachable") {
+          add(100, "offline", `${site.name} is unreachable`, `${site.domain} did not respond from the latest public check.`, "Check DNS");
+        }
+        if (ops.web === "offline" || ops.api === "offline") {
+          add(96, "offline", `${site.name} has an offline service`, `${ops.web === "offline" ? "Website" : "API"} health is failing.`, "Open Ops");
+        }
+        if (ops.web === "degraded" || ops.api === "degraded") {
+          add(88, "degraded", `${site.name} is degraded`, `${api.errorRate?.toFixed?.(1) || "0.0"}% API errors and ${api.p95 || ops.latency}ms p95/latency.`, "Open Ops");
+        }
+        if (hasApiUsageData(site) && api.errorRate > 5) {
+          add(84, "degraded", `${site.name} API errors are high`, `${api.errorRate.toFixed(1)}% error rate on ${formatNumber(api.totalRequests)} requests.`, "Inspect API");
+        }
+        if (hasApiUsageData(site) && api.p95 > 900) {
+          add(82, "degraded", `${site.name} API is slow`, `${api.p95}ms p95 latency is slowing the experience.`, "Profile endpoint");
+        }
+        if (site.registryProject) {
+          needs.filter((need) => need.field === "health").forEach((need) => {
+            add(78, need.status === "unreachable" ? "offline" : "missing", `Wire health for ${site.name}`, `${connectorValue(need)} is ${need.status}.`, "Add /api/health");
+          });
+        }
+        if (hasTrafficData(site) && site.trend < -10 && !site.internal) {
+          add(68, "drifting", `${site.name} traffic is falling`, `${Math.abs(site.trend).toFixed(1)}% decline in the current window.`, "Review traffic");
+        }
+        if (hasTrafficData(site) && retirementScore(site) >= 55 && !site.internal) {
+          add(62, "retire", `${site.name} may be a retire candidate`, `Retire risk is ${retirementScore(site)} with weak momentum.`, "Decide");
+        }
+        if (site.registryProject && needs.length >= 4) {
+          add(58, "planned", `${site.name} connection setup is incomplete`, `${needs.length} connector items still need wiring.`, "Connect");
+        }
+      });
+
+      return items
+        .sort((a, b) => b.priority - a.priority || a.site.name.localeCompare(b.site.name))
+        .slice(0, 8);
+    }
+
+    function briefingText(items, momentums) {
+      const top = items[0];
+      const growing = momentums.filter((item) => item.momentum.tone === "growing");
+      const rescue = momentums.filter((item) => item.momentum.tone === "rescue" || item.momentum.tone === "retire");
+      const drifting = momentums.filter((item) => item.momentum.tone === "drifting");
+      if (!top) return "No urgent blockers today. Keep shipping and connect the remaining telemetry.";
+      const second = items[1] ? ` Next: ${items[1].title}.` : "";
+      return `${top.title}. ${top.detail} ${growing.length} project${growing.length === 1 ? "" : "s"} are growing, ${drifting.length} are drifting, and ${rescue.length} need rescue or retirement.${second}`;
+    }
+
+    function statusLabel(status) {
+      return status.charAt(0).toUpperCase() + status.slice(1);
+    }
+
+    function trendMarkup(value) {
+      const klass = value > 2 ? "good" : value < -2 ? "bad" : "flat";
+      const prefix = value > 0 ? "+" : "";
+      return `<span class="trend ${klass}">${prefix}${value.toFixed(1)}%</span>`;
+    }
+
+    function sparkline(values, color) {
+      const max = Math.max(...values, 1);
+      const min = Math.min(...values, 0);
+      const range = Math.max(max - min, 1);
+      const points = values.map((value, index) => {
+        const x = (index / (values.length - 1)) * 98 + 1;
+        const y = 26 - ((value - min) / range) * 23;
+        return `${x.toFixed(1)},${y.toFixed(1)}`;
+      }).join(" ");
+      return `<svg class="spark" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><polyline points="${points}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    }
+
+    function renderMetrics() {
+      const visible = portfolioSites();
+      const trafficSites = visible.filter(hasTrafficData);
+      const searchSites = visible.filter(hasSearchData);
+      const revenueSites = visible.filter(hasRevenueInputs);
+      const apiUsageSites = visible.filter(hasApiUsageData);
+      const visits = trafficSites.reduce((sum, site) => sum + scaled(site, "visits"), 0);
+      const visitors = trafficSites.reduce((sum, site) => sum + scaled(site, "visitors"), 0);
+      const revenue = revenueSites.reduce((sum, site) => sum + revenueFor(site), 0);
+      const blendedRpm = visits ? (revenue / visits) * 1000 : 0;
+      const impressions = searchSites.reduce((sum, site) => sum + scaled(site, "searchImpressions"), 0);
+      const queryTotal = searchSites.reduce((sum, site) => sum + site.queries.length, 0);
+      const organic = visits ? trafficSites.reduce((sum, site) => sum + scaled(site, "visits") * site.organic, 0) / visits : 0;
+      const trend = trafficSites.length ? trafficSites.reduce((sum, site) => sum + site.trend, 0) / trafficSites.length : 0;
+      const retire = visible.filter((site) => retirementScore(site) >= 55 || site.status === "retire");
+      const avgHealth = sites.length ? sites.reduce((sum, site) => sum + healthScore(site), 0) / sites.length : 0;
+      const connectionList = visible.flatMap(connectionUnits);
+      const onlineConnections = connectionList.filter((unit) => isConnectionOk(unit.status)).length;
+      const connectionIssues = visible.filter((site) => connectionIssueCount(site) > 0);
+      const latencySites = visible.filter((site) => site.ops?.latency > 0);
+      const avgLatency = latencySites.length ? latencySites.reduce((sum, site) => sum + site.ops.latency, 0) / latencySites.length : 0;
+      const apiRequestTotal = apiUsageSites.reduce((sum, site) => sum + scaledApi(site, "totalRequests"), 0);
+      const apiCostTotal = apiUsageSites.reduce((sum, site) => sum + scaledApi(site, "cost"), 0);
+      const apiWeightedErrors = apiRequestTotal
+        ? apiUsageSites.reduce((sum, site) => sum + scaledApi(site, "totalRequests") * (site.api?.errorRate || 0), 0) / apiRequestTotal
+        : 0;
+      const connectionWork = visible
+        .filter((site) => site.registryProject)
+        .reduce((sum, site) => sum + connectorNeeds(site).length, 0);
+      const todayItems = attentionItems(visible);
+      const momentumList = visible.map((site) => ({ site, momentum: momentumFor(site) }));
+      const avgMomentum = momentumList.length
+        ? Math.round(momentumList.reduce((sum, item) => sum + item.momentum.score, 0) / momentumList.length)
+        : 0;
+      const growingMomentum = momentumList.filter((item) => item.momentum.tone === "growing").length;
+      const weakMomentum = momentumList.filter((item) => ["drifting", "rescue", "retire"].includes(item.momentum.tone)).length;
+
+      renderLiveSnapshot();
+      $("#totalVisits").textContent = trafficSites.length ? formatNumber(visits) : "Not connected";
+      $("#visitorCount").textContent = trafficSites.length ? `${formatNumber(visitors)} visitors` : "Connect analytics";
+      if (trafficSites.length) {
+        $("#portfolioTrend").outerHTML = trendMarkup(trend).replace("<span", '<span id="portfolioTrend"');
+      } else {
+        $("#portfolioTrend").className = "trend flat";
+        $("#portfolioTrend").textContent = "No feed";
+      }
+      $("#forecastRevenue").textContent = revenueSites.length ? formatMoney(revenue, true) : "Not connected";
+      $("#forecastRpm").textContent = revenueSites.length ? `${formatMoney(blendedRpm)} RPM blend` : "Connect traffic + RPM";
+      $("#forecastDelta").textContent = revenueSites.length ? "Live" : "No feed";
+      $("#searchImpressions").textContent = searchSites.length ? formatNumber(impressions) : "Not connected";
+      $("#organicShare").textContent = searchSites.length ? `${Math.round(organic)}% organic` : "Connect Search Console";
+      $("#queryCount").textContent = `${queryTotal} queries`;
+      $("#opsOnline").textContent = `${onlineConnections}/${connectionList.length}`;
+      $("#opsLatency").textContent = `${Math.round(avgLatency)}ms avg`;
+      $("#opsIssues").className = `trend ${connectionIssues.length ? "bad" : "good"}`;
+      $("#opsIssues").textContent = connectionIssues.length ? `${connectionIssues.length} issue${connectionIssues.length === 1 ? "" : "s"}` : "Healthy";
+      $("#attentionCount").textContent = todayItems.length;
+      $("#attentionTop").textContent = todayItems[0] ? todayItems[0].site.name : "No blockers";
+      $("#attentionUrgency").className = `trend ${todayItems.some((item) => item.priority >= 90) ? "bad" : todayItems.length ? "flat" : "good"}`;
+      $("#attentionUrgency").textContent = todayItems.some((item) => item.priority >= 90) ? "Urgent" : todayItems.length ? "Review" : "Clear";
+      $("#momentumAverage").textContent = avgMomentum;
+      $("#momentumLeaders").textContent = `${growingMomentum} growing`;
+      $("#momentumState").className = `trend ${weakMomentum > growingMomentum ? "bad" : avgMomentum >= 70 ? "good" : "flat"}`;
+      $("#momentumState").textContent = weakMomentum > growingMomentum ? `${weakMomentum} weak` : avgMomentum >= 70 ? "Strong" : "Mixed";
+      $("#apiRequests").textContent = apiUsageSites.length ? formatNumber(apiRequestTotal) : "Not connected";
+      $("#apiCost").textContent = apiUsageSites.length ? `${formatMoney(apiCostTotal, true)} cost` : "Add usage reporter";
+      $("#apiErrors").className = `trend ${apiUsageSites.length && apiWeightedErrors > 5 ? "bad" : apiUsageSites.length && apiWeightedErrors > 2 ? "flat" : "good"}`;
+      $("#apiErrors").textContent = apiUsageSites.length ? `${apiWeightedErrors.toFixed(1)}% errors` : "No feed";
+      $("#retireCount").textContent = retire.length;
+      $("#retireVisits").textContent = trafficSites.length ? `${formatNumber(retire.reduce((sum, site) => sum + scaled(site, "visits"), 0))} visits at risk` : "Traffic not connected";
+      $("#navSites").textContent = sites.length;
+      $("#navToday").textContent = todayItems.length;
+      $("#navOps").textContent = connectionIssues.length;
+      $("#navConnect").textContent = connectionWork;
+      $("#navQueries").textContent = allQueries().length;
+      $("#navRevenue").textContent = revenueSites.length ? formatMoney(revenue, true) : "TBD";
+      $("#navRetire").textContent = retire.length;
+      $("#sidebarSource").textContent = registryState.liveCheckedAt ? "Live registry" : registryState.source === "connection-registry.json" ? "Registry file" : "Registry";
+      $("#sidebarWindow").textContent = state.windowDays === 365 ? "12 months" : `${state.windowDays} days`;
+      $("#sidebarHealth").textContent = `${Math.round(avgHealth)}%`;
+      $("#portfolioCaption").textContent = `${visible.length} of ${sites.length} sites`;
+    }
+
+    function renderTable() {
+      const rows = portfolioSites().map((site, index) => {
+        const color = colors[index % colors.length];
+        const momentum = momentumFor(site);
+        const trafficReady = hasTrafficData(site);
+        const revenueReady = hasRevenueInputs(site);
+        return `
+          <tr class="${site.id === state.selectedId ? "selected" : ""}" data-site-id="${site.id}">
+            <td>
+              <div class="site-cell">
+                <div class="site-icon" style="background:${color}">${site.name.slice(0, 2).toUpperCase()}</div>
+                <div class="site-name">
+                  <strong>${site.name}</strong>
+                  <small>${site.domain}</small>
+                </div>
+              </div>
+            </td>
+            <td>${trafficReady ? formatNumber(scaled(site, "visits")) : mutedText("Connect")}</td>
+            <td>${trafficReady ? trendMarkup(site.trend) : mutedText("No feed")}</td>
+            <td>${trafficReady ? `${site.organic}%` : mutedText("-")}</td>
+            <td>${trafficReady ? `${site.bounce}%` : mutedText("-")}</td>
+            <td><span class="momentum-pill ${momentum.tone}">${momentum.score} ${momentum.label}</span></td>
+            <td>${revenueReady ? formatMoney(revenueFor(site), true) : mutedText("Connect")}</td>
+            <td><span class="pill ${site.status}">${statusLabel(site.status)}</span></td>
+            <td>${trafficReady ? sparkline(site.spark, color) : mutedText("No feed")}</td>
+          </tr>
+        `;
+      }).join("");
+
+      $("#siteTable").innerHTML = rows || `<tr><td colspan="9"><div class="empty-state">No sites match the current filters.</div></td></tr>`;
+      document.querySelectorAll("#siteTable tr[data-site-id]").forEach((row) => {
+        row.addEventListener("click", () => {
+          state.selectedId = row.dataset.siteId;
+          syncCalculatorWithSelected(false);
+          render();
+        });
+      });
+    }
+
+    function renderSelected() {
+      const site = selectedSite();
+      const color = colors[sites.findIndex((item) => item.id === site.id) % colors.length];
+      $("#selectedDomain").textContent = site.domain;
+      $("#selectedStatus").className = `pill ${site.status}`;
+      $("#selectedStatus").textContent = statusLabel(site.status);
+
+      const retire = retirementScore(site);
+      const health = healthScore(site);
+      const opsHealth = opsHealthScore(site);
+      const trafficReady = hasTrafficData(site);
+      const revenueReady = hasRevenueInputs(site);
+      const apiReady = hasApiUsageData(site);
+      const searchDepth = hasSearchData(site) ? Math.min(100, Math.round(site.searchImpressions / 1800)) : 0;
+      const momentum = momentumFor(site);
+
+      $("#selectedSite").innerHTML = `
+        <div class="site-hero">
+          <div class="site-head">
+            <div class="site-cell">
+              <div class="site-icon" style="background:${color}">${site.name.slice(0, 2).toUpperCase()}</div>
+              <div class="site-name">
+                <strong>${site.name}</strong>
+                <small>${site.category}</small>
+              </div>
+            </div>
+            <strong>${revenueReady ? formatMoney(revenueFor(site), true) : "No revenue feed"}</strong>
+          </div>
+          <div class="mini-grid">
+            <div class="mini-stat"><span>Visits</span><strong>${trafficReady ? formatNumber(scaled(site, "visits")) : "Connect"}</strong></div>
+            <div class="mini-stat"><span>Avg session</span><strong>${trafficReady ? `${site.avgSession}s` : "-"}</strong></div>
+            <div class="mini-stat"><span>Pages per visit</span><strong>${trafficReady ? site.pagesPerVisit.toFixed(1) : "-"}</strong></div>
+            <div class="mini-stat"><span>API requests</span><strong>${apiReady ? formatNumber(scaledApi(site, "totalRequests")) : "Connect"}</strong></div>
+            <div class="mini-stat"><span>Momentum</span><strong>${momentum.score}</strong></div>
+          </div>
+        </div>
+        <div class="score">
+          <div class="score-row"><span>Momentum</span><div class="meter"><span style="--value:${momentum.score}%;--bar:${momentum.score > 70 ? "var(--green)" : momentum.score > 45 ? "var(--amber)" : "var(--red)"}"></span></div><strong>${momentum.score}</strong></div>
+          <div class="score-row"><span>Health</span><div class="meter"><span style="--value:${health}%;--bar:${health > 70 ? "var(--green)" : health > 45 ? "var(--amber)" : "var(--red)"}"></span></div><strong>${health}</strong></div>
+          <div class="score-row"><span>Ops health</span><div class="meter"><span style="--value:${opsHealth}%;--bar:${opsHealth > 70 ? "var(--green)" : opsHealth > 45 ? "var(--amber)" : "var(--red)"}"></span></div><strong>${opsHealth}</strong></div>
+          <div class="score-row"><span>Search depth</span><div class="meter"><span style="--value:${searchDepth}%;--bar:var(--blue)"></span></div><strong>${searchDepth}</strong></div>
+          <div class="score-row"><span>Retire risk</span><div class="meter"><span style="--value:${retire}%;--bar:${retire > 55 ? "var(--red)" : "var(--amber)"}"></span></div><strong>${retire}</strong></div>
+        </div>
+      `;
+    }
+
+    function renderSources() {
+      const site = selectedSite();
+      if (!hasTrafficData(site)) {
+        $("#sourcePanel").innerHTML = `
+          <div class="empty-state">
+            <strong>Traffic source feed pending</strong>
+            <span>Connect GA4 or Vercel Analytics to show Organic, Direct, Referral, Social, and Paid traffic for ${site.name}.</span>
+          </div>
+        `;
+        return;
+      }
+      const total = Object.values(site.sources).reduce((sum, value) => sum + value, 0) || 1;
+      const stack = Object.entries(site.sources).map(([name, value]) => {
+        const width = (value / total) * 100;
+        return `<span style="--w:${width}%;--c:${sourceColors[name]}" title="${name} ${value}%"></span>`;
+      }).join("");
+      const legend = Object.entries(site.sources).map(([name, value]) => `
+        <div class="legend-item"><span class="dot" style="--c:${sourceColors[name]}"></span><span>${name}</span><strong>${value}%</strong></div>
+      `).join("");
+      $("#sourcePanel").innerHTML = `
+        <div class="source-stack">${stack}</div>
+        <div class="legend">${legend}</div>
+      `;
+    }
+
+    function renderBehavior() {
+      const site = selectedSite();
+      if (!hasTrafficData(site)) {
+        $("#behaviorStats").innerHTML = [
+          ["Bounce", "-"],
+          ["Conversion", "-"],
+          ["Viewability", "-"]
+        ].map(([label, value]) => `<div class="mini-stat"><span>${label}</span><strong>${value}</strong></div>`).join("");
+        $("#insights").innerHTML = `
+          <div class="insight">
+            <div class="insight-icon" style="background:#2c6fbb"><svg viewBox="0 0 24 24"><path d="M12 20h.01"/><path d="M12 4a8 8 0 0 1 8 8c0 3-2 4.5-4 5.5H8C6 16.5 4 15 4 12a8 8 0 0 1 8-8z"/></svg></div>
+            <p>Traffic analytics is waiting for a real feed. Uptime, registry, and health signals are live; behavior insights will unlock after GA4 or Vercel Analytics is wired.</p>
+          </div>
+        `;
+        return;
+      }
+      const stats = [
+        ["Bounce", `${site.bounce}%`],
+        ["Conversion", `${site.conversion}%`],
+        ["Viewability", `${site.viewability}%`]
+      ].map(([label, value]) => `<div class="mini-stat"><span>${label}</span><strong>${value}</strong></div>`).join("");
+
+      const insights = [];
+      if (site.internal) {
+        insights.push(["#2f8f70", "Private control room. Judge this by uptime, access health, and API syncs instead of public traffic."]);
+      }
+      if (site.visits === 0) {
+        insights.push(["#c65252", "No visits recorded. Move it to the retirement queue unless it has strategic value."]);
+      }
+      if (site.bounce > 60) {
+        insights.push(["#c98b2c", "High bounce. Check intent mismatch, page speed, and first-screen clarity."]);
+      }
+      if (site.organic < 25 && site.searchImpressions > 10000) {
+        insights.push(["#2c6fbb", "Search visibility exists, but organic visits are weak. Test titles and meta descriptions."]);
+      }
+      if (site.trend > 15) {
+        insights.push(["#2f8f70", "Traffic momentum is strong. Publish adjacent pages while the topic is warming up."]);
+      }
+      if (site.pagesPerVisit > 3) {
+        insights.push(["#7251a3", "Deep sessions. Add internal offers, comparison pages, or newsletter capture."]);
+      }
+      if (!insights.length) {
+        insights.push(["#25818a", "Stable performance. Keep monitoring source mix and query drift."]);
+      }
+
+      $("#behaviorStats").innerHTML = stats;
+      $("#insights").innerHTML = insights.map(([color, text]) => `
+        <div class="insight">
+          <div class="insight-icon" style="background:${color}"><svg viewBox="0 0 24 24"><path d="M12 20h.01"/><path d="M12 4a8 8 0 0 1 8 8c0 3-2 4.5-4 5.5H8C6 16.5 4 15 4 12a8 8 0 0 1 8-8z"/></svg></div>
+          <p>${text}</p>
+        </div>
+      `).join("");
+    }
+
+    function renderGeo() {
+      const site = selectedSite();
+      if (!hasGeoData(site)) {
+        $("#geoBars").innerHTML = `
+          <div class="empty-state">
+            <strong>Visitor geography feed pending</strong>
+            <span>Connect analytics to show countries, regions, and where people are finding ${site.name} from.</span>
+          </div>
+        `;
+        return;
+      }
+      const entries = Object.entries(site.countries).sort((a, b) => b[1] - a[1]);
+      $("#geoBars").innerHTML = entries.map(([country, value], index) => `
+        <div class="bar-row">
+          <span>${country}</span>
+          <div class="bar-track"><span class="bar-fill" style="--w:${value}%;--c:${colors[index % colors.length]}"></span></div>
+          <strong>${value}%</strong>
+        </div>
+      `).join("");
+    }
+
+    function renderToday() {
+      const visible = portfolioSites();
+      const items = attentionItems(visible);
+      const momentumList = visible
+        .map((site) => ({ site, momentum: momentumFor(site) }))
+        .sort((a, b) => a.momentum.score - b.momentum.score || a.site.name.localeCompare(b.site.name));
+      const counts = {
+        growing: momentumList.filter((item) => item.momentum.tone === "growing").length,
+        stable: momentumList.filter((item) => ["stable", "private"].includes(item.momentum.tone)).length,
+        drifting: momentumList.filter((item) => item.momentum.tone === "drifting").length,
+        rescue: momentumList.filter((item) => ["rescue", "retire"].includes(item.momentum.tone)).length
+      };
+      const avg = momentumList.length
+        ? Math.round(momentumList.reduce((sum, item) => sum + item.momentum.score, 0) / momentumList.length)
+        : 0;
+
+      $("#attentionCaption").textContent = items.length
+        ? `${items.length} ranked item${items.length === 1 ? "" : "s"} need attention today`
+        : "No urgent blockers today";
+
+      $("#attentionList").innerHTML = items.map((item, index) => {
+        const severity = attentionSeverity(item.priority);
+        return `
+          <div class="attention-item ${item.type}">
+            <div class="attention-rank">${index + 1}</div>
+            <div class="attention-copy">
+              <span class="severity-pill ${severity.tone}">${severity.label}</span>
+              <span class="muted">${item.site.domain}</span>
+              <strong>${item.title}</strong>
+              <p>${item.detail}</p>
+            </div>
+            <button class="small-button" data-attention-site="${item.site.id}">${item.action}</button>
+          </div>
+        `;
+      }).join("") || `<div class="empty-state">Nothing is screaming for attention. Nice problem to have.</div>`;
+
+      $("#founderBriefing").textContent = briefingText(items, momentumList);
+      $("#momentumSummary").innerHTML = [
+        ["Average", avg],
+        ["Growing", counts.growing],
+        ["Stable", counts.stable],
+        ["Drifting", counts.drifting],
+        ["Rescue", counts.rescue]
+      ].map(([label, value]) => `
+        <div class="momentum-card">
+          <span>${label}</span>
+          <strong>${value}</strong>
+        </div>
+      `).join("");
+
+      $("#momentumTable").innerHTML = momentumList.map(({ site, momentum }) => `
+        <tr data-site-id="${site.id}">
+          <td>
+            <div class="site-name">
+              <strong>${site.name}</strong>
+              <small>${site.domain}</small>
+            </div>
+          </td>
+          <td>${momentum.score}</td>
+          <td><span class="momentum-pill ${momentum.tone}">${momentum.label}</span></td>
+          <td>${momentum.reasons.slice(0, 3).join(", ")}</td>
+        </tr>
+      `).join("") || `<tr><td colspan="4"><div class="empty-state">No momentum data yet.</div></td></tr>`;
+
+      document.querySelectorAll("[data-attention-site], #momentumTable tr[data-site-id]").forEach((target) => {
+        target.addEventListener("click", () => {
+          state.selectedId = target.dataset.attentionSite || target.dataset.siteId;
+          syncCalculatorWithSelected(false);
+          render();
+        });
+      });
+    }
+
+    function renderOps() {
+      const visible = portfolioSites();
+      const selected = selectedSite();
+      const connectionList = visible.flatMap(connectionUnits);
+      const onlineConnections = connectionList.filter((unit) => isConnectionOk(unit.status)).length;
+      const issueSites = visible.filter((site) => connectionIssueCount(site) > 0);
+      const apiUsageSites = visible.filter(hasApiUsageData);
+      const activeApiSites = apiUsageSites.filter((site) => (site.api?.totalRequests || 0) > 0);
+      const totalKeys = apiUsageSites.reduce((sum, site) => sum + (site.api?.keys || 0), 0);
+      const totalCost = apiUsageSites.reduce((sum, site) => sum + scaledApi(site, "cost"), 0);
+
+      $("#opsSummary").innerHTML = [
+        ["Connections", `${onlineConnections}/${connectionList.length}`],
+        ["Issue sites", issueSites.length],
+        ["Active APIs", activeApiSites.length],
+        ["API keys", totalKeys]
+      ].map(([label, value]) => `<div class="mini-stat"><span>${label}</span><strong>${value}</strong></div>`).join("");
+
+      $("#opsCaption").textContent = `${issueSites.length} issue${issueSites.length === 1 ? "" : "s"} across ${visible.length} visible projects`;
+
+      const opsRows = [...visible]
+        .sort((a, b) => connectionIssueCount(b) - connectionIssueCount(a) || opsHealthScore(a) - opsHealthScore(b))
+        .map((site, index) => {
+          const color = colors[index % colors.length];
+          const ops = site.ops || {};
+          return `
+            <tr class="${site.id === state.selectedId ? "selected" : ""}" data-site-id="${site.id}">
+              <td>
+                <div class="site-cell">
+                  <div class="site-icon" style="background:${color}">${site.name.slice(0, 2).toUpperCase()}</div>
+                  <div class="site-name">
+                    <strong>${site.name}</strong>
+                    <small>${ops.incident || site.domain}</small>
+                  </div>
+                </div>
+              </td>
+              <td><span class="status-line"><span class="status-dot ${ops.web}"></span>${statusPill(ops.web)}</span></td>
+              <td><span class="status-line"><span class="status-dot ${ops.api}"></span>${statusPill(ops.api)}</span></td>
+              <td><span class="status-line"><span class="status-dot ${ops.analytics}"></span>${statusPill(ops.analytics)}</span></td>
+              <td>${ops.lastSync}</td>
+              <td>${ops.latency ? `${ops.latency}ms` : "-"}</td>
+              <td>${uptimeText(site)}</td>
+              <td>${ops.deploy}</td>
+            </tr>
+          `;
+        }).join("");
+
+      $("#opsTable").innerHTML = opsRows || `<tr><td colspan="8"><div class="empty-state">No projects match the current filters.</div></td></tr>`;
+      document.querySelectorAll("#opsTable tr[data-site-id]").forEach((row) => {
+        row.addEventListener("click", () => {
+          state.selectedId = row.dataset.siteId;
+          syncCalculatorWithSelected(false);
+          render();
+        });
+      });
+
+      $("#selectedApiCaption").textContent = `${selected.name} endpoints and consumers`;
+      if (hasApiUsageData(selected)) {
+        $("#apiTotal").innerHTML = `
+          <span class="muted">Selected API activity</span>
+          <strong>${formatNumber(scaledApi(selected, "totalRequests"))} requests</strong>
+          <div class="api-breakdown">
+            <div><span>Error rate</span><strong>${(selected.api?.errorRate || 0).toFixed(1)}%</strong></div>
+            <div><span>p95 latency</span><strong>${selected.api?.p95 || 0}ms</strong></div>
+            <div><span>Estimated cost</span><strong>${formatMoney(scaledApi(selected, "cost"), true)}</strong></div>
+            <div><span>Auth failures</span><strong>${formatNumber(scaledApi(selected, "authFailures"))}</strong></div>
+          </div>
+        `;
+      } else {
+        $("#apiTotal").innerHTML = `
+          <span class="muted">Selected API activity</span>
+          <strong>Not connected</strong>
+          <div class="api-breakdown">
+            <div><span>Endpoint feed</span><strong>Missing</strong></div>
+            <div><span>Consumers</span><strong>Missing</strong></div>
+            <div><span>Cost</span><strong>-</strong></div>
+            <div><span>Errors</span><strong>-</strong></div>
+          </div>
+        `;
+      }
+
+      const endpointRows = (hasApiUsageData(selected) ? (selected.api?.endpoints || []) : []).map((endpoint) => {
+        const signal = endpointSignal(endpoint);
+        return `
+          <tr>
+            <td>${endpoint.route}</td>
+            <td>${formatNumber(Math.round(endpoint.requests * (state.windowDays / 30)))}</td>
+            <td>${endpoint.errorRate.toFixed(1)}%</td>
+            <td>${endpoint.p95}ms</td>
+            <td>${formatMoney(endpoint.cost * (state.windowDays / 30), true)}</td>
+            <td><span class="pill ${signalClass(signal)}">${signal}</span></td>
+          </tr>
+        `;
+      }).join("");
+      $("#endpointTable").innerHTML = endpointRows || `<tr><td colspan="6"><div class="empty-state">No API usage feed connected for this project.</div></td></tr>`;
+
+      const consumers = hasApiUsageData(selected) ? (selected.api?.consumers || []) : [];
+      $("#apiConsumers").innerHTML = consumers.map((consumer) => `
+        <div class="incident-item">
+          <span class="status-dot ${consumer.status}"></span>
+          <div class="incident-copy">
+            <strong>${consumer.name}</strong>
+            <span>${formatNumber(Math.round(consumer.requests * (state.windowDays / 30)))} requests - ${consumer.lastSeen}</span>
+          </div>
+          <strong>${formatMoney(consumer.cost * (state.windowDays / 30), true)}</strong>
+        </div>
+      `).join("") || `<div class="empty-state">No API consumers yet.</div>`;
+
+      const incidents = visible.flatMap((site) => {
+        const items = [];
+        const ops = site.ops || {};
+        const api = site.api || {};
+        if (ops.web === "offline") items.push({ site, status: "offline", title: "Website offline", detail: `${site.domain} is not responding`, priority: 1 });
+        if (ops.web === "degraded") items.push({ site, status: "degraded", title: "Website degraded", detail: `${ops.latency}ms response latency`, priority: 2 });
+        if (ops.api === "offline") items.push({ site, status: "offline", title: "API offline", detail: "API health check failed", priority: 1 });
+        if (ops.api === "degraded") items.push({ site, status: "degraded", title: "API degraded", detail: hasApiUsageData(site) ? `${api.errorRate.toFixed(1)}% errors, ${api.p95}ms p95` : "Health or API connector needs wiring", priority: 2 });
+        if (site.connectors?.analytics?.status === "connected" && (ops.analytics !== "online" || ops.syncMinutes > 60)) {
+          items.push({ site, status: "stale", title: "Data sync stale", detail: `Last sync ${ops.lastSync}`, priority: 3 });
+        }
+        if (Number.isFinite(ops.sslDays) && ops.sslDays > 0 && ops.sslDays < 30) {
+          items.push({ site, status: "degraded", title: "SSL renewal soon", detail: `${ops.sslDays} days remaining`, priority: 3 });
+        }
+        if (hasApiUsageData(site) && api.cost > 20 && api.totalRequests < 25000) items.push({ site, status: "degraded", title: "Cost watch", detail: `${formatMoney(api.cost)} in API cost on modest traffic`, priority: 4 });
+        return items;
+      }).sort((a, b) => a.priority - b.priority).slice(0, 7);
+
+      $("#incidentFeed").innerHTML = incidents.map((incident) => `
+        <div class="incident-item">
+          <span class="status-dot ${incident.status}"></span>
+          <div class="incident-copy">
+            <strong>${incident.site.name}: ${incident.title}</strong>
+            <span>${incident.detail}</span>
+          </div>
+          <button class="small-button" data-focus-site="${incident.site.id}">View</button>
+        </div>
+      `).join("") || `<div class="empty-state">No incidents in the current view.</div>`;
+
+      document.querySelectorAll("[data-focus-site]").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.selectedId = button.dataset.focusSite;
+          syncCalculatorWithSelected(false);
+          render();
+        });
+      });
+    }
+
+    function renderRegistryStatus(visible) {
+      const registryCount = visible.filter((site) => site.registryProject).length;
+      const liveSummary = liveUptimeReport?.summary;
+      const liveText = registryState.checking ? "Checking..." : shortTime(registryState.liveCheckedAt);
+      const supportText = registryState.liveCheckSupported ? "Server ready" : "Static view";
+      $("#registryStatusStrip").innerHTML = [
+        ["Registry", registryState.source],
+        ["Projects", registryCount],
+        ["Live check", liveText],
+        ["Mode", supportText]
+      ].map(([label, value]) => `<div class="mini-stat"><span>${label}</span><strong>${value}</strong></div>`).join("");
+      if (liveSummary) {
+        $("#connectCaption").textContent = `${liveSummary.websitesConnected}/${liveSummary.total} websites live, ${liveSummary.healthConnected}/${liveSummary.total} health endpoints live, ${liveSummary.unreachable} unreachable`;
+      }
+    }
+
+    function renderConnectors() {
+      const visible = portfolioSites().filter((site) => site.registryProject);
+      const selected = selectedSite();
+      const selectedConnectors = selected.connectors || defaultConnectors(selected);
+      const connectedWebsites = visible.filter((site) => ["connected", "protected"].includes(site.connectors?.website?.status)).length;
+      const liveHealth = visible.filter((site) => ["connected", "protected"].includes(site.connectors?.health?.status)).length;
+      const pendingAnalytics = visible.filter((site) => site.connectors?.analytics?.status === "pending").length;
+      const pendingSearch = visible.filter((site) => site.connectors?.search?.status === "pending").length;
+      const totalNeeds = visible.reduce((sum, site) => sum + connectorNeeds(site).length, 0);
+      const avgCompletion = visible.length
+        ? Math.round(visible.reduce((sum, site) => sum + connectorCompletion(site), 0) / visible.length)
+        : 0;
+
+      renderRegistryStatus(visible);
+
+      $("#connectorOverview").innerHTML = [
+        ["Websites", `${connectedWebsites}/${visible.length}`],
+        ["Health live", `${liveHealth}/${visible.length}`],
+        ["Analytics pending", pendingAnalytics],
+        ["Search pending", pendingSearch],
+        ["Complete", `${avgCompletion}%`],
+        ["Checked", shortTime(registryState.liveCheckedAt)]
+      ].map(([label, value]) => `<div class="mini-stat"><span>${label}</span><strong>${value}</strong></div>`).join("");
+
+      if (!liveUptimeReport?.summary) {
+        $("#connectCaption").textContent = `${totalNeeds} setup item${totalNeeds === 1 ? "" : "s"} remain across ${visible.length} visible projects`;
+      }
+
+      $("#connectorTable").innerHTML = visible
+        .sort((a, b) => connectorCompletion(a) - connectorCompletion(b) || a.name.localeCompare(b.name))
+        .map((site, index) => {
+          const connectors = site.connectors || defaultConnectors(site);
+          const overall = connectorOverallStatus(connectors);
+          const color = colors[index % colors.length];
+          return `
+            <tr class="${site.id === state.selectedId ? "selected" : ""}" data-site-id="${site.id}">
+              <td>
+                <div class="site-cell">
+                  <div class="site-icon" style="background:${color}">${site.name.slice(0, 2).toUpperCase()}</div>
+                  <div class="site-name">
+                    <strong>${site.name}</strong>
+                    <small>${site.domain}</small>
+                  </div>
+                </div>
+              </td>
+              <td>${projectPurpose(site)}</td>
+              <td>${statusPill(connectors.website.status)}</td>
+              <td>${statusPill(connectors.health.status)}</td>
+              <td>${statusPill(overall.status).replace(statusText(overall.status), overall.label)}</td>
+              <td>${shortTime(connectionLastChecked(site))}</td>
+            </tr>
+          `;
+        }).join("") || `<tr><td colspan="6"><div class="empty-state">No projects match the current filters.</div></td></tr>`;
+
+      document.querySelectorAll("#connectorTable tr[data-site-id]").forEach((row) => {
+        row.addEventListener("click", () => {
+          state.selectedId = row.dataset.siteId;
+          syncCalculatorWithSelected(false);
+          render();
+        });
+      });
+
+      const selectedNeeds = connectorNeeds(selected);
+      const selectedStatus = selectedNeeds.length ? "planned" : "ready";
+      $("#connectorSelectedTitle").textContent = selected.name;
+      $("#connectorSelectedDomain").textContent = selected.domain;
+      $("#connectorSelectedStatus").className = `pill ${selectedStatus}`;
+      $("#connectorSelectedStatus").textContent = selectedNeeds.length ? `${selectedNeeds.length} left` : "Ready";
+      $("#connectorSelectedStack").innerHTML = connectorFields.map((field) => {
+        const connection = selectedConnectors[field];
+        return `
+          <div class="connector-row">
+            <span>${connectorLabels[field]}</span>
+            <code title="${connection?.note || connectorValue(connection)}">${connectorValue(connection)}</code>
+            ${statusPill(connection.status)}
+          </div>
+        `;
+      }).join("");
+
+      const healthUrl = selectedConnectors.health?.url || `https://${selected.domain}/api/health`;
+      const apiUrl = selectedConnectors.apiBase?.url || `https://${selected.domain}/api`;
+      $("#connectionSnippet").textContent = [
+        `PROJECT_ID=${selected.id}`,
+        `PROJECT_DOMAIN=${selected.domain}`,
+        `COMMAND_CENTRE_URL=https://www.buildbearing.com/api/checks`,
+        `HEALTH_URL=${healthUrl}`,
+        `API_BASE_URL=${apiUrl}`,
+        "",
+        "GET /api/health -> { \"ok\": true, \"project\": PROJECT_ID }",
+        "POST /api/checks -> uptime, latency, deploy, api usage"
+      ].join("\n");
+
+      const steps = visible
+        .flatMap((site) => connectorNeeds(site).map((need) => ({ site, need, completion: connectorCompletion(site) })))
+        .sort((a, b) => {
+          const priority = { unreachable: 0, missing: 1, planned: 2, pending: 3 };
+          return (priority[a.need.status] ?? 4) - (priority[b.need.status] ?? 4) || a.completion - b.completion;
+        })
+        .slice(0, 6);
+
+      $("#connectionNextSteps").innerHTML = steps.map((step) => `
+        <div class="step-item">
+          <span class="status-dot ${step.need.status === "unreachable" || step.need.status === "missing" ? "offline" : "degraded"}"></span>
+          <p><strong>${step.site.name}</strong>: ${connectorLabels[step.need.field]} ${step.need.status}. ${connectorValue(step.need)}</p>
+        </div>
+      `).join("") || `<div class="empty-state">All visible projects are connected.</div>`;
+    }
+
+    function renderQueries() {
+      const queries = allQueries()
+        .filter((query) => state.engine === "all" || query.engine === state.engine)
+        .sort((a, b) => b.impressions - a.impressions);
+      $("#queryTable").innerHTML = queries.map((query) => `
+        <tr data-site-id="${query.siteId}">
+          <td>${query.query}</td>
+          <td>${query.site}</td>
+          <td>${query.engine}</td>
+          <td>${formatNumber(query.clicks)}</td>
+          <td>${formatNumber(query.impressions)}</td>
+          <td>${query.ctr.toFixed(1)}%</td>
+          <td>${query.position.toFixed(1)}</td>
+          <td><span class="pill ${opportunitySignal(query) === "Defend" ? "keep" : opportunitySignal(query) === "Monitor" ? "watch" : "retire"}">${opportunitySignal(query)}</span></td>
+        </tr>
+      `).join("") || `<tr><td colspan="8"><div class="empty-state">No Search Console feed connected yet.</div></td></tr>`;
+
+      document.querySelectorAll("#queryTable tr[data-site-id]").forEach((row) => {
+        row.addEventListener("click", () => {
+          state.selectedId = row.dataset.siteId;
+          render();
+          document.querySelector("#overview").scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      });
+    }
+
+    function renderCalculatorControls() {
+      const controls = [
+        ["visits", "Monthly visits", 0, 250000, 500, ""],
+        ["pages", "Pages per visit", 0.5, 8, 0.1, ""],
+        ["slots", "Ad slots per page", 1, 8, 1, ""],
+        ["fill", "Fill rate", 0, 100, 1, "%"],
+        ["viewability", "Viewability", 0, 100, 1, "%"],
+        ["rpm", "Ad RPM", 0, 40, 0.1, "$"]
+      ];
+      $("#calcControls").innerHTML = controls.map(([key, label, min, max, step, suffix]) => {
+        const value = state.calculator[key];
+        return `
+          <div class="control">
+            <label for="calc-${key}">${label}</label>
+            <input id="calc-${key}-range" type="range" min="${min}" max="${max}" step="${step}" value="${value}" data-calc="${key}">
+            <input id="calc-${key}" type="number" min="${min}" max="${max}" step="${step}" value="${value}" data-calc="${key}" aria-label="${label} ${suffix}">
+          </div>
+        `;
+      }).join("");
+
+      document.querySelectorAll("[data-calc]").forEach((input) => {
+        input.addEventListener("input", (event) => {
+          const key = event.target.dataset.calc;
+          state.calculator[key] = Number(event.target.value);
+          document.querySelectorAll(`[data-calc="${key}"]`).forEach((peer) => {
+            if (peer !== event.target) peer.value = event.target.value;
+          });
+          renderCalculatorResults();
+        });
+      });
+    }
+
+    function renderCalculatorResults() {
+      const calc = state.calculator;
+      const impressions = calc.visits * calc.pages * calc.slots * (calc.fill / 100) * (calc.viewability / 100);
+      const revenue = impressions * (calc.rpm / 1000);
+      $("#calcRevenue").textContent = formatMoney(revenue);
+      $("#calcImpressions").textContent = formatNumber(impressions);
+      $("#calcRpv").textContent = formatMoney(calc.visits ? revenue / calc.visits : 0);
+      $("#calcAnnual").textContent = formatMoney(revenue * 12, true);
+    }
+
+    function renderRetire() {
+      const candidates = [...sites]
+        .map((site) => ({ site, score: retirementScore(site) }))
+        .filter(({ site, score }) => site.status === "retire" || score >= 40)
+        .sort((a, b) => b.score - a.score);
+
+      $("#retireGrid").innerHTML = candidates.map(({ site, score }) => {
+        const reasons = [];
+        if (hasTrafficData(site) && site.visits === 0) reasons.push("Zero visits in the current window");
+        if (hasTrafficData(site) && site.trend < -10) reasons.push(`${Math.abs(site.trend).toFixed(1)}% traffic decline`);
+        if (hasSearchData(site) && site.searchImpressions < 1000) reasons.push("No meaningful search demand");
+        if (hasTrafficData(site) && site.bounce > 65) reasons.push(`${site.bounce}% bounce rate`);
+        if (!hasTrafficData(site)) reasons.push("Retirement decision was manually marked before analytics is connected");
+        if (!reasons.length) reasons.push("Needs a fresh decision before more time goes in");
+
+        return `
+          <div class="retire-item">
+            <div style="display:flex;justify-content:space-between;gap:10px;align-items:start;">
+              <div>
+                <strong>${site.name}</strong>
+                <p class="muted">${site.domain}</p>
+              </div>
+              <span class="pill ${score > 70 ? "retire" : "watch"}">${score}</span>
+            </div>
+            <div class="retire-reasons">${reasons.map((reason) => `<span>${reason}</span>`).join("")}</div>
+            <div class="retire-actions">
+              <button class="small-button danger" data-retire="${site.id}"><svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>Retire</button>
+              <button class="small-button keep" data-keep="${site.id}"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Keep watching</button>
+            </div>
+          </div>
+        `;
+      }).join("") || `<div class="empty-state">No retirement candidates right now.</div>`;
+
+      document.querySelectorAll("[data-retire]").forEach((button) => {
+        button.addEventListener("click", () => updateSiteStatus(button.dataset.retire, "retire"));
+      });
+      document.querySelectorAll("[data-keep]").forEach((button) => {
+        button.addEventListener("click", () => updateSiteStatus(button.dataset.keep, "watch"));
+      });
+    }
+
+    function updateSiteStatus(id, status) {
+      const site = sites.find((item) => item.id === id);
+      if (!site) return;
+      site.status = status;
+      toast(`${site.name} marked as ${statusLabel(status)}.`);
+      render();
+    }
+
+    function syncCalculatorWithSelected(showToast = true) {
+      const site = selectedSite();
+      state.calculator = {
+        visits: site.visits,
+        pages: Number(site.pagesPerVisit.toFixed(1)),
+        slots: 3,
+        fill: site.fillRate,
+        viewability: site.viewability,
+        rpm: site.adRpm
+      };
+      if (showToast) toast(`Forecast synced to ${site.name}.`);
+    }
+
+    function exportCsv() {
+      const header = ["name", "domain", "category", "status", "visits", "visitors", "trend", "organic", "bounce", "revenue_estimate", "web_status", "api_status", "analytics_status", "api_requests", "api_error_rate", "api_cost"];
+      const rows = sites.map((site) => [
+        site.name,
+        site.domain,
+        site.category,
+        site.status,
+        scaled(site, "visits"),
+        scaled(site, "visitors"),
+        site.trend,
+        site.organic,
+        site.bounce,
+        revenueFor(site).toFixed(2),
+        site.ops?.web || "offline",
+        site.ops?.api || "offline",
+        site.ops?.analytics || "stale",
+        scaledApi(site, "totalRequests"),
+        site.api?.errorRate || 0,
+        scaledApi(site, "cost").toFixed(2)
+      ]);
+      const csv = [header, ...rows].map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(",")).join("\n");
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `command-centre-${state.windowDays}d.csv`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      toast("CSV exported.");
+    }
+
+    function addSiteFromForm() {
+      const name = $("#newName").value.trim();
+      const domain = $("#newDomain").value.trim();
+      if (!name || !domain) return;
+      const visits = Number($("#newVisits").value || 0);
+      const organic = Number($("#newOrganic").value || 0);
+      const rpm = Number($("#newRpm").value || 0);
+      const id = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || `site-${Date.now()}`;
+      const site = {
+        id,
+        name,
+        domain,
+        category: $("#newCategory").value,
+        status: visits < 200 ? "watch" : "keep",
+        visits,
+        visitors: Math.round(visits * 0.78),
+        trend: visits ? 3.5 : 0,
+        organic,
+        bounce: visits ? 48 : 0,
+        avgSession: visits ? 110 : 0,
+        pagesPerVisit: visits ? 2.1 : 0,
+        adRpm: rpm,
+        fillRate: visits ? 78 : 0,
+        viewability: visits ? 62 : 0,
+        conversion: visits ? 1.1 : 0,
+        searchImpressions: Math.round(visits * 6.5),
+        queries: visits ? [[`${name.toLowerCase()} alternative`, "Google", Math.round(visits * 0.03), Math.round(visits * 1.8), 1.7, 18.2]] : [],
+        sources: { Organic: organic, Direct: Math.max(0, 55 - organic / 2), Referral: 12, Social: 8, Paid: Math.max(0, 25 - organic / 2) },
+        countries: { "United States": 38, Canada: 12, "United Kingdom": 9, India: 8, Other: 33 },
+        spark: Array.from({ length: 12 }, (_, index) => Math.max(0, Math.round((visits / 400) * (0.55 + index / 20)))),
+        telemetry: {
+          traffic: visits ? "manual" : "not_connected",
+          geography: visits ? "manual" : "not_connected",
+          search: visits ? "manual" : "not_connected",
+          revenue: visits && rpm ? "manual" : "not_connected",
+          apiUsage: visits ? "manual" : "not_connected"
+        },
+        ops: {
+          web: visits ? "online" : "offline",
+          api: visits ? "idle" : "offline",
+          analytics: visits ? "online" : "stale",
+          syncMinutes: visits ? 12 : 1440,
+          lastSync: visits ? "12m ago" : "24h ago",
+          latency: visits ? 220 : 0,
+          uptime: visits ? 99.9 : 0,
+          sslDays: 90,
+          deploy: "new",
+          lastChecked: "just now",
+          incident: visits ? "New project baseline" : "No traffic or connection data"
+        },
+        api: {
+          totalRequests: visits ? Math.round(visits * 0.22) : 0,
+          errorRate: visits ? 0.8 : 0,
+          p95: visits ? 260 : 0,
+          cost: visits ? visits * 0.0004 : 0,
+          keys: visits ? 1 : 0,
+          authFailures: visits ? 2 : 0,
+          rateLimited: 0,
+          endpoints: visits ? [{ route: "GET /api/status", requests: Math.round(visits * 0.22), errorRate: 0.8, p95: 260, cost: visits * 0.0004, consumers: 1, signal: "Baseline" }] : [],
+          consumers: visits ? [{ name: "web-app", requests: Math.round(visits * 0.22), cost: visits * 0.0004, lastSeen: "12m ago", status: "online" }] : []
+        }
+      };
+      site.connectors = defaultConnectors(site);
+      site.registryProject = true;
+      sites.push(site);
+      state.selectedId = id;
+      $("#siteForm").reset();
+      $("#siteDialog").close();
+      syncCalculatorWithSelected(false);
+      toast(`${name} added.`);
+      render();
+    }
+
+    function toast(message) {
+      const el = $("#toast");
+      el.textContent = message;
+      el.classList.add("show");
+      clearTimeout(toast.timer);
+      toast.timer = setTimeout(() => el.classList.remove("show"), 2600);
+    }
+
+    function bindEvents() {
+      $("#gateForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const password = $("#gatePassword").value.trim();
+        if (password === ACCESS_PASSWORD) {
+          sessionStorage.setItem("command-centre-unlocked", "yes");
+          unlockGate();
+          toast("Welcome to command.centre.");
+          return;
+        }
+        $("#gateMessage").textContent = "Password did not match.";
+        $("#gatePassword").select();
+      });
+
+      $("#gateFocusPassword")?.addEventListener("click", () => {
+        $("#gatePassword").focus();
+      });
+
+      $("#gatePreviewRegistry")?.addEventListener("click", () => {
+        $("#gateMessage").textContent = "Unlock to view the live registry.";
+        $("#gatePassword").focus();
+      });
+
+      $("#siteSearch").addEventListener("input", (event) => {
+        state.search = event.target.value;
+        render();
+      });
+
+      $("#statusFilter").addEventListener("change", (event) => {
+        state.filter = event.target.value;
+        render();
+      });
+
+      $("#engineFilter").addEventListener("change", (event) => {
+        state.engine = event.target.value;
+        renderQueries();
+      });
+
+      document.querySelectorAll("[data-window]").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.windowDays = Number(button.dataset.window);
+          document.querySelectorAll("[data-window]").forEach((item) => item.classList.toggle("active", item === button));
+          render();
+        });
+      });
+
+      document.querySelectorAll("[data-scroll-target]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const target = document.getElementById(button.dataset.scrollTarget);
+          target.scrollIntoView({ behavior: "smooth", block: "start" });
+          document.querySelectorAll("[data-scroll-target]").forEach((item) => item.classList.toggle("active", item === button));
+        });
+      });
+
+      $("#sortButton").addEventListener("click", () => {
+        const order = ["visits", "momentum", "revenue", "trend", "status"];
+        const next = order[(order.indexOf(state.sort) + 1) % order.length];
+        state.sort = next;
+        toast(`Sorted by ${next}.`);
+        render();
+      });
+
+      $("#refreshButton").addEventListener("click", () => {
+        toast("Live signals refreshed.");
+        render();
+      });
+
+      $("#checkConnectionsButton").addEventListener("click", () => {
+        runLiveUptimeChecks();
+      });
+
+      $("#refreshBriefingButton").addEventListener("click", () => {
+        renderToday();
+        toast("Briefing refreshed.");
+      });
+
+      $("#copyRegistryButton").addEventListener("click", async () => {
+        const payload = JSON.stringify(connectionRegistryPayload(), null, 2);
+        try {
+          await navigator.clipboard.writeText(payload);
+          toast("Connection registry copied.");
+        } catch (error) {
+          toast("Registry is ready in the Connect panel.");
+        }
+      });
+
+      $("#reloadRegistryButton").addEventListener("click", () => {
+        loadProjectRegistry(true).then(() => loadLiveUptimeReport(true));
+      });
+
+      $("#runUptimeButton").addEventListener("click", () => {
+        runLiveUptimeChecks();
+      });
+
+      $("#exportButton").addEventListener("click", exportCsv);
+      $("#useSelectedButton").addEventListener("click", () => {
+        syncCalculatorWithSelected(true);
+        renderCalculatorControls();
+        renderCalculatorResults();
+      });
+
+      $("#addSiteButton").addEventListener("click", () => $("#siteDialog").showModal());
+      $("#closeSiteDialog").addEventListener("click", () => $("#siteDialog").close());
+      $("#cancelSiteButton").addEventListener("click", () => $("#siteDialog").close());
+      $("#siteForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        addSiteFromForm();
+      });
+    }
+
+    function render() {
+      renderMetrics();
+      renderTable();
+      renderSelected();
+      renderSources();
+      renderBehavior();
+      renderGeo();
+      renderToday();
+      renderOps();
+      renderConnectors();
+      renderQueries();
+      renderCalculatorControls();
+      renderCalculatorResults();
+      renderRetire();
+    }
+
+    initializeGate();
+    bindEvents();
+    syncCalculatorWithSelected(false);
+    render();
+    loadProjectRegistry().then(() => loadLiveUptimeReport());
+  </script>
+</body>
+</html>

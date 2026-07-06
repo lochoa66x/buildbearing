@@ -1,0 +1,107 @@
+[
+  {
+    "id": "buildbearing",
+    "name": "command.centre",
+    "domain": "buildbearing.com",
+    "role": "private_command_centre",
+    "connectors": {
+      "website": { "status": "connected", "url": "https://www.buildbearing.com/" },
+      "health": { "status": "missing", "url": "https://www.buildbearing.com/api/health", "note": "returned 404" },
+      "apiBase": { "status": "planned", "url": "https://www.buildbearing.com/api" },
+      "analytics": { "status": "private", "provider": "internal only" },
+      "search": { "status": "noindex", "provider": "robots noindex" },
+      "deploy": { "status": "pending", "provider": "Vercel/Cloudflare TBD" },
+      "auth": { "status": "planned", "provider": "server-side password gate" }
+    }
+  },
+  {
+    "id": "voynichtech",
+    "name": "VoynichTech",
+    "domain": "voynichtech.ca",
+    "role": "public_site",
+    "connectors": {
+      "website": { "status": "connected", "url": "https://voynichtech.ca/" },
+      "health": { "status": "missing", "url": "https://voynichtech.ca/api/health", "note": "returned 404" },
+      "apiBase": { "status": "planned", "url": "https://voynichtech.ca/api" },
+      "analytics": { "status": "pending", "provider": "GA4/Vercel Analytics" },
+      "search": { "status": "pending", "provider": "Google Search Console" },
+      "deploy": { "status": "pending", "provider": "Vercel project link" },
+      "auth": { "status": "manual", "provider": "public site" }
+    }
+  },
+  {
+    "id": "matchseer",
+    "name": "MatchSeer",
+    "domain": "matchseer.ca",
+    "role": "public_site",
+    "connectors": {
+      "website": { "status": "unreachable", "url": "https://matchseer.ca/", "note": "curl returned 000" },
+      "health": { "status": "unreachable", "url": "https://matchseer.ca/api/health", "note": "curl returned 000" },
+      "apiBase": { "status": "planned", "url": "https://matchseer.ca/api" },
+      "analytics": { "status": "pending", "provider": "GA4/Vercel Analytics" },
+      "search": { "status": "pending", "provider": "Google Search Console" },
+      "deploy": { "status": "pending", "provider": "Vercel project link" },
+      "auth": { "status": "manual", "provider": "public site" }
+    }
+  },
+  {
+    "id": "niftytoolshub",
+    "name": "NiftyToolsHub",
+    "domain": "niftytoolshub.com",
+    "role": "public_site",
+    "connectors": {
+      "website": { "status": "connected", "url": "https://niftytoolshub.com/" },
+      "health": { "status": "missing", "url": "https://niftytoolshub.com/api/health", "note": "returned 404" },
+      "apiBase": { "status": "planned", "url": "https://niftytoolshub.com/api" },
+      "analytics": { "status": "pending", "provider": "GA4/Vercel Analytics" },
+      "search": { "status": "pending", "provider": "Google Search Console" },
+      "deploy": { "status": "pending", "provider": "Vercel project link" },
+      "auth": { "status": "manual", "provider": "public site" }
+    }
+  },
+  {
+    "id": "chronovisorai",
+    "name": "ChronovisorAI",
+    "domain": "chronovisorai.com",
+    "role": "public_site",
+    "connectors": {
+      "website": { "status": "connected", "url": "https://chronovisorai.com/" },
+      "health": { "status": "connected", "url": "https://chronovisorai.com/api/health" },
+      "apiBase": { "status": "connected", "url": "https://chronovisorai.com/api" },
+      "analytics": { "status": "pending", "provider": "GA4/Vercel Analytics" },
+      "search": { "status": "pending", "provider": "Google Search Console" },
+      "deploy": { "status": "pending", "provider": "Vercel project link" },
+      "auth": { "status": "manual", "provider": "public site" }
+    }
+  },
+  {
+    "id": "vertmex",
+    "name": "Vertmex",
+    "domain": "vertmex.com",
+    "role": "public_site",
+    "connectors": {
+      "website": { "status": "planned", "url": "https://vertmex.com/" },
+      "health": { "status": "planned", "url": "https://vertmex.com/api/health" },
+      "apiBase": { "status": "planned", "url": "https://vertmex.com/api" },
+      "analytics": { "status": "pending", "provider": "GA4/Vercel Analytics" },
+      "search": { "status": "pending", "provider": "Google Search Console" },
+      "deploy": { "status": "pending", "provider": "Vercel project link" },
+      "auth": { "status": "manual", "provider": "public site" }
+    }
+  },
+  {
+    "id": "keyscout",
+    "name": "KeyScout",
+    "domain": "keyscout.app",
+    "role": "public_site",
+    "connectors": {
+      "website": { "status": "connected", "url": "https://keyscout.app/" },
+      "health": { "status": "missing", "url": "https://keyscout.app/api/health", "note": "returned 404" },
+      "apiBase": { "status": "planned", "url": "https://keyscout.app/api" },
+      "analytics": { "status": "pending", "provider": "GA4/Vercel Analytics" },
+      "search": { "status": "pending", "provider": "Google Search Console" },
+      "deploy": { "status": "pending", "provider": "Vercel project link" },
+      "auth": { "status": "manual", "provider": "public site" }
+    }
+  }
+]
