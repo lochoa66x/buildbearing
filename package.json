@@ -1,0 +1,12 @@
+{
+  "name": "buildbearing-command-centre",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --check api/login.js && node --check api/logout.js && node --check api/registry.js && node --check api/uptime-status.js && node --check api/check-uptime.js && node --check api/public-summary.js && node --check lib/auth.mjs && node --check lib/uptime-checker.mjs && node --check middleware.js"
+  },
+  "dependencies": {
+    "@vercel/functions": "^2.2.13"
+  }
+}

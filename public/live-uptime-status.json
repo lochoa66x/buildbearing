@@ -1,0 +1,169 @@
+{
+  "generatedBy": "buildbearing-command-centre",
+  "checkedAt": "2026-07-06T17:18:04.199Z",
+  "durationMs": 1680,
+  "summary": {
+    "total": 6,
+    "websitesConnected": 5,
+    "healthConnected": 1,
+    "unreachable": 1,
+    "missingHealth": 4,
+    "degraded": 0
+  },
+  "projects": [
+    {
+      "id": "buildbearing",
+      "name": "command.centre",
+      "domain": "buildbearing.com",
+      "role": "private_command_centre",
+      "website": {
+        "status": "connected",
+        "url": "https://www.buildbearing.com/",
+        "finalUrl": "https://www.buildbearing.com/",
+        "statusCode": 200,
+        "responseTimeMs": 798,
+        "sslDays": 52,
+        "note": "200 in 798ms",
+        "redirectChain": []
+      },
+      "health": {
+        "status": "missing",
+        "url": "https://www.buildbearing.com/api/health",
+        "finalUrl": "https://www.buildbearing.com/api/health",
+        "statusCode": 404,
+        "responseTimeMs": 481,
+        "sslDays": 52,
+        "note": "returned 404",
+        "redirectChain": []
+      }
+    },
+    {
+      "id": "voynichtech",
+      "name": "VoynichTech",
+      "domain": "voynichtech.ca",
+      "role": "public_site",
+      "website": {
+        "status": "connected",
+        "url": "https://voynichtech.ca/",
+        "finalUrl": "https://voynichtech.ca/",
+        "statusCode": 200,
+        "responseTimeMs": 524,
+        "sslDays": 47,
+        "note": "200 in 524ms",
+        "redirectChain": []
+      },
+      "health": {
+        "status": "missing",
+        "url": "https://voynichtech.ca/api/health",
+        "finalUrl": "https://voynichtech.ca/api/health",
+        "statusCode": 404,
+        "responseTimeMs": 485,
+        "sslDays": 47,
+        "note": "returned 404",
+        "redirectChain": []
+      }
+    },
+    {
+      "id": "matchseer",
+      "name": "MatchSeer",
+      "domain": "matchseer.ca",
+      "role": "public_site",
+      "website": {
+        "status": "unreachable",
+        "url": "https://matchseer.ca/",
+        "finalUrl": "https://matchseer.ca/",
+        "statusCode": 0,
+        "responseTimeMs": 316,
+        "note": "ENOTFOUND",
+        "redirectChain": []
+      },
+      "health": {
+        "status": "unreachable",
+        "url": "https://matchseer.ca/api/health",
+        "finalUrl": "https://matchseer.ca/api/health",
+        "statusCode": 0,
+        "responseTimeMs": 314,
+        "note": "ENOTFOUND",
+        "redirectChain": []
+      }
+    },
+    {
+      "id": "niftytoolshub",
+      "name": "NiftyToolsHub",
+      "domain": "niftytoolshub.com",
+      "role": "public_site",
+      "website": {
+        "status": "connected",
+        "url": "https://niftytoolshub.com/",
+        "finalUrl": "https://niftytoolshub.com/",
+        "statusCode": 200,
+        "responseTimeMs": 467,
+        "sslDays": 77,
+        "note": "200 in 467ms",
+        "redirectChain": []
+      },
+      "health": {
+        "status": "missing",
+        "url": "https://niftytoolshub.com/api/health",
+        "finalUrl": "https://niftytoolshub.com/api/health",
+        "statusCode": 404,
+        "responseTimeMs": 390,
+        "sslDays": 77,
+        "note": "returned 404",
+        "redirectChain": []
+      }
+    },
+    {
+      "id": "chronovisorai",
+      "name": "ChronovisorAI",
+      "domain": "chronovisorai.com",
+      "role": "public_site",
+      "website": {
+        "status": "connected",
+        "url": "https://chronovisorai.com/",
+        "finalUrl": "https://chronovisorai.com/",
+        "statusCode": 200,
+        "responseTimeMs": 383,
+        "sslDays": 86,
+        "note": "200 in 383ms",
+        "redirectChain": []
+      },
+      "health": {
+        "status": "connected",
+        "url": "https://chronovisorai.com/api/health",
+        "finalUrl": "https://chronovisorai.com/api/health",
+        "statusCode": 200,
+        "responseTimeMs": 1156,
+        "sslDays": 86,
+        "note": "200 in 1156ms",
+        "redirectChain": []
+      }
+    },
+    {
+      "id": "keyscout",
+      "name": "KeyScout",
+      "domain": "keyscout.app",
+      "role": "public_site",
+      "website": {
+        "status": "connected",
+        "url": "https://keyscout.app/",
+        "finalUrl": "https://keyscout.app/",
+        "statusCode": 200,
+        "responseTimeMs": 327,
+        "sslDays": 37,
+        "note": "200 in 327ms",
+        "redirectChain": []
+      },
+      "health": {
+        "status": "missing",
+        "url": "https://keyscout.app/api/health",
+        "finalUrl": "https://keyscout.app/api/health",
+        "statusCode": 404,
+        "responseTimeMs": 366,
+        "sslDays": 37,
+        "note": "returned 404",
+        "redirectChain": []
+      }
+    }
+  ]
+}
