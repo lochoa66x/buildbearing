@@ -75,6 +75,21 @@
     }
   },
   {
+    "id": "vertmex",
+    "name": "Vertmex",
+    "domain": "vertmex.com",
+    "role": "public_site",
+    "connectors": {
+      "website": { "status": "planned", "url": "https://vertmex.com/" },
+      "health": { "status": "planned", "url": "https://vertmex.com/api/health" },
+      "apiBase": { "status": "planned", "url": "https://vertmex.com/api" },
+      "analytics": { "status": "pending", "provider": "GA4/Vercel Analytics" },
+      "search": { "status": "pending", "provider": "Google Search Console" },
+      "deploy": { "status": "pending", "provider": "Vercel project link" },
+      "auth": { "status": "manual", "provider": "public site" }
+    }
+  },
+  {
     "id": "keyscout",
     "name": "KeyScout",
     "domain": "keyscout.app",

@@ -1,12 +1,12 @@
 {
   "generatedBy": "buildbearing-command-centre",
-  "checkedAt": "2026-07-06T17:18:04.199Z",
-  "durationMs": 1680,
+  "checkedAt": "2026-07-06T22:51:35.662Z",
+  "durationMs": 2651,
   "summary": {
-    "total": 6,
+    "total": 7,
     "websitesConnected": 5,
     "healthConnected": 1,
-    "unreachable": 1,
+    "unreachable": 2,
     "missingHealth": 4,
     "degraded": 0
   },
@@ -21,9 +21,9 @@
         "url": "https://www.buildbearing.com/",
         "finalUrl": "https://www.buildbearing.com/",
         "statusCode": 200,
-        "responseTimeMs": 798,
+        "responseTimeMs": 208,
         "sslDays": 52,
-        "note": "200 in 798ms",
+        "note": "200 in 208ms",
         "redirectChain": []
       },
       "health": {
@@ -31,7 +31,7 @@
         "url": "https://www.buildbearing.com/api/health",
         "finalUrl": "https://www.buildbearing.com/api/health",
         "statusCode": 404,
-        "responseTimeMs": 481,
+        "responseTimeMs": 148,
         "sslDays": 52,
         "note": "returned 404",
         "redirectChain": []
@@ -47,9 +47,9 @@
         "url": "https://voynichtech.ca/",
         "finalUrl": "https://voynichtech.ca/",
         "statusCode": 200,
-        "responseTimeMs": 524,
+        "responseTimeMs": 196,
         "sslDays": 47,
-        "note": "200 in 524ms",
+        "note": "200 in 196ms",
         "redirectChain": []
       },
       "health": {
@@ -57,7 +57,7 @@
         "url": "https://voynichtech.ca/api/health",
         "finalUrl": "https://voynichtech.ca/api/health",
         "statusCode": 404,
-        "responseTimeMs": 485,
+        "responseTimeMs": 204,
         "sslDays": 47,
         "note": "returned 404",
         "redirectChain": []
@@ -73,7 +73,7 @@
         "url": "https://matchseer.ca/",
         "finalUrl": "https://matchseer.ca/",
         "statusCode": 0,
-        "responseTimeMs": 316,
+        "responseTimeMs": 128,
         "note": "ENOTFOUND",
         "redirectChain": []
       },
@@ -82,7 +82,7 @@
         "url": "https://matchseer.ca/api/health",
         "finalUrl": "https://matchseer.ca/api/health",
         "statusCode": 0,
-        "responseTimeMs": 314,
+        "responseTimeMs": 126,
         "note": "ENOTFOUND",
         "redirectChain": []
       }
@@ -97,9 +97,9 @@
         "url": "https://niftytoolshub.com/",
         "finalUrl": "https://niftytoolshub.com/",
         "statusCode": 200,
-        "responseTimeMs": 467,
+        "responseTimeMs": 288,
         "sslDays": 77,
-        "note": "200 in 467ms",
+        "note": "200 in 288ms",
         "redirectChain": []
       },
       "health": {
@@ -107,7 +107,7 @@
         "url": "https://niftytoolshub.com/api/health",
         "finalUrl": "https://niftytoolshub.com/api/health",
         "statusCode": 404,
-        "responseTimeMs": 390,
+        "responseTimeMs": 222,
         "sslDays": 77,
         "note": "returned 404",
         "redirectChain": []
@@ -123,9 +123,9 @@
         "url": "https://chronovisorai.com/",
         "finalUrl": "https://chronovisorai.com/",
         "statusCode": 200,
-        "responseTimeMs": 383,
+        "responseTimeMs": 466,
         "sslDays": 86,
-        "note": "200 in 383ms",
+        "note": "200 in 466ms",
         "redirectChain": []
       },
       "health": {
@@ -133,9 +133,33 @@
         "url": "https://chronovisorai.com/api/health",
         "finalUrl": "https://chronovisorai.com/api/health",
         "statusCode": 200,
-        "responseTimeMs": 1156,
+        "responseTimeMs": 1274,
         "sslDays": 86,
-        "note": "200 in 1156ms",
+        "note": "200 in 1274ms",
+        "redirectChain": []
+      }
+    },
+    {
+      "id": "vertmex",
+      "name": "Vertmex",
+      "domain": "vertmex.com",
+      "role": "public_site",
+      "website": {
+        "status": "unreachable",
+        "url": "https://vertmex.com/",
+        "finalUrl": "https://vertmex.com/",
+        "statusCode": 0,
+        "responseTimeMs": 282,
+        "note": "ENOTFOUND",
+        "redirectChain": []
+      },
+      "health": {
+        "status": "unreachable",
+        "url": "https://vertmex.com/api/health",
+        "finalUrl": "https://vertmex.com/api/health",
+        "statusCode": 0,
+        "responseTimeMs": 282,
+        "note": "ENOTFOUND",
         "redirectChain": []
       }
     },
@@ -149,9 +173,9 @@
         "url": "https://keyscout.app/",
         "finalUrl": "https://keyscout.app/",
         "statusCode": 200,
-        "responseTimeMs": 327,
+        "responseTimeMs": 679,
         "sslDays": 37,
-        "note": "200 in 327ms",
+        "note": "200 in 679ms",
         "redirectChain": []
       },
       "health": {
@@ -159,7 +183,7 @@
         "url": "https://keyscout.app/api/health",
         "finalUrl": "https://keyscout.app/api/health",
         "statusCode": 404,
-        "responseTimeMs": 366,
+        "responseTimeMs": 589,
         "sslDays": 37,
         "note": "returned 404",
         "redirectChain": []

@@ -1927,6 +1927,17 @@
       padding: 24px;
     }
 
+    .empty-state strong {
+      color: var(--ink);
+    }
+
+    .empty-state span {
+      display: block;
+      max-width: 360px;
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+
     svg {
       width: 18px;
       height: 18px;
@@ -2920,6 +2931,7 @@
       { id: "matchseer", name: "MatchSeer", domain: "matchseer.ca" },
       { id: "niftytoolshub", name: "NiftyToolsHub", domain: "niftytoolshub.com" },
       { id: "chronovisorai", name: "ChronovisorAI", domain: "chronovisorai.com" },
+      { id: "vertmex", name: "Vertmex", domain: "vertmex.com" },
       { id: "keyscout", name: "KeyScout", domain: "keyscout.app" }
     ];
 
@@ -2966,6 +2978,15 @@
         website: { status: "connected", url: "https://chronovisorai.com/" },
         health: { status: "connected", url: "https://chronovisorai.com/api/health" },
         apiBase: { status: "connected", url: "https://chronovisorai.com/api" },
+        analytics: { status: "pending", provider: "GA4/Vercel Analytics" },
+        search: { status: "pending", provider: "Google Search Console" },
+        deploy: { status: "pending", provider: "Vercel project link" },
+        auth: { status: "manual", provider: "public site" }
+      },
+      vertmex: {
+        website: { status: "planned", url: "https://vertmex.com/" },
+        health: { status: "planned", url: "https://vertmex.com/api/health" },
+        apiBase: { status: "planned", url: "https://vertmex.com/api" },
         analytics: { status: "pending", provider: "GA4/Vercel Analytics" },
         search: { status: "pending", provider: "Google Search Console" },
         deploy: { status: "pending", provider: "Vercel project link" },
@@ -3121,12 +3142,12 @@
         ops: {
           web: "offline",
           api: "idle",
-          analytics: "stale",
-          syncMinutes: 1440,
-          lastSync: "waiting",
+          analytics: "pending",
+          syncMinutes: 0,
+          lastSync: "not connected",
           latency: 0,
           uptime: 0,
-          sslDays: 0,
+          sslDays: null,
           deploy: "unlinked",
           lastChecked: "not checked",
           incident: "Waiting for live registry check"
@@ -3166,7 +3187,7 @@
 
     function statusToOps(kind, status) {
       if (["connected", "protected", "private", "manual", "noindex"].includes(status)) return "online";
-      if (["missing", "pending", "planned", "idle"].includes(status)) return kind === "health" ? "idle" : "degraded";
+      if (["missing", "pending", "planned", "idle"].includes(status)) return kind === "health" ? "idle" : "pending";
       if (["degraded", "stale"].includes(status)) return "degraded";
       return "offline";
     }
@@ -3224,11 +3245,16 @@
         site.ops = site.ops || {};
         site.ops.web = statusToOps("website", connectors.website.status);
         site.ops.api = statusToOps("health", connectors.health.status);
+        site.ops.analytics = statusToOps("analytics", connectors.analytics?.status);
         site.ops.latency = website.responseTimeMs || site.ops.latency || 0;
         site.ops.sslDays = website.sslDays ?? site.ops.sslDays ?? 0;
         site.ops.lastChecked = report.checkedAt ? "live" : site.ops.lastChecked;
-        site.ops.syncMinutes = report.checkedAt ? Math.max(0, Math.round((Date.now() - new Date(report.checkedAt).getTime()) / 60000)) : site.ops.syncMinutes;
+        site.ops.syncMinutes = site.ops.analytics === "online" && report.checkedAt
+          ? Math.max(0, Math.round((Date.now() - new Date(report.checkedAt).getTime()) / 60000))
+          : 0;
+        site.ops.lastSync = site.ops.analytics === "online" ? shortTime(report.checkedAt) : "not connected";
         if (connectors.website.status === "unreachable") site.ops.uptime = 0;
+        if (["connected", "protected"].includes(connectors.website.status)) site.ops.uptime = 100;
         site.ops.incident = liveIncidentFor(connectors.website, connectors.health);
       });
       return true;
@@ -3475,19 +3501,22 @@
     }
 
     function connectionUnits(site) {
-      return [
+      const units = [
         { name: "Website", status: site.ops?.web || "offline" },
-        { name: "API", status: site.ops?.api || "offline" },
-        { name: "Analytics", status: site.ops?.analytics || "stale" }
+        { name: "Health", status: site.ops?.api || "offline" }
       ];
+      if (["connected", "private", "manual"].includes(site.connectors?.analytics?.status)) {
+        units.push({ name: "Analytics", status: site.ops?.analytics || "offline" });
+      }
+      return units;
     }
 
     function isConnectionOk(status) {
-      return status === "online" || status === "idle";
+      return status === "online" || status === "idle" || status === "pending";
     }
 
     function connectionIssueCount(site) {
-      return connectionUnits(site).filter((unit) => !isConnectionOk(unit.status)).length + ((site.ops?.syncMinutes || 0) > 60 ? 1 : 0);
+      return connectionUnits(site).filter((unit) => !isConnectionOk(unit.status)).length;
     }
 
     function opsHealthScore(site) {
@@ -3497,10 +3526,17 @@
         if (unit.status === "degraded" || unit.status === "stale") score -= 18;
         if (unit.status === "offline" || unit.status === "error") score -= 34;
       });
-      if ((ops.syncMinutes || 0) > 60) score -= 12;
       if ((ops.latency || 0) > 700) score -= 14;
-      if ((ops.sslDays || 90) < 30) score -= 10;
+      if (Number.isFinite(ops.sslDays) && ops.sslDays > 0 && ops.sslDays < 30) score -= 10;
       return Math.max(0, Math.min(100, Math.round(score)));
+    }
+
+    function uptimeText(site) {
+      const ops = site.ops || {};
+      if (ops.web === "online") return "Live";
+      if (ops.web === "pending") return "Pending";
+      if (ops.web === "offline") return "Down";
+      return Number.isFinite(ops.uptime) ? `${ops.uptime.toFixed(2)}%` : "-";
     }
 
     function statusText(status) {
@@ -3928,7 +3964,12 @@
     function renderSources() {
       const site = selectedSite();
       if (!hasTrafficData(site)) {
-        $("#sourcePanel").innerHTML = `<div class="empty-state">Analytics is not connected for this project yet.</div>`;
+        $("#sourcePanel").innerHTML = `
+          <div class="empty-state">
+            <strong>Traffic source feed pending</strong>
+            <span>Connect GA4 or Vercel Analytics to show Organic, Direct, Referral, Social, and Paid traffic for ${site.name}.</span>
+          </div>
+        `;
         return;
       }
       const total = Object.values(site.sources).reduce((sum, value) => sum + value, 0) || 1;
@@ -3956,7 +3997,7 @@
         $("#insights").innerHTML = `
           <div class="insight">
             <div class="insight-icon" style="background:#2c6fbb"><svg viewBox="0 0 24 24"><path d="M12 20h.01"/><path d="M12 4a8 8 0 0 1 8 8c0 3-2 4.5-4 5.5H8C6 16.5 4 15 4 12a8 8 0 0 1 8-8z"/></svg></div>
-            <p>Traffic analytics is not connected yet. Uptime, registry, and health signals are live; behavior insights will unlock after analytics is wired.</p>
+            <p>Traffic analytics is waiting for a real feed. Uptime, registry, and health signals are live; behavior insights will unlock after GA4 or Vercel Analytics is wired.</p>
           </div>
         `;
         return;
@@ -4002,7 +4043,12 @@
     function renderGeo() {
       const site = selectedSite();
       if (!hasGeoData(site)) {
-        $("#geoBars").innerHTML = `<div class="empty-state">Visitor geography is not connected yet.</div>`;
+        $("#geoBars").innerHTML = `
+          <div class="empty-state">
+            <strong>Visitor geography feed pending</strong>
+            <span>Connect analytics to show countries, regions, and where people are finding ${site.name} from.</span>
+          </div>
+        `;
         return;
       }
       const entries = Object.entries(site.countries).sort((a, b) => b[1] - a[1]);
@@ -4129,7 +4175,7 @@
               <td><span class="status-line"><span class="status-dot ${ops.analytics}"></span>${statusPill(ops.analytics)}</span></td>
               <td>${ops.lastSync}</td>
               <td>${ops.latency ? `${ops.latency}ms` : "-"}</td>
-              <td>${ops.uptime.toFixed(2)}%</td>
+              <td>${uptimeText(site)}</td>
               <td>${ops.deploy}</td>
             </tr>
           `;
@@ -4204,8 +4250,12 @@
         if (ops.web === "degraded") items.push({ site, status: "degraded", title: "Website degraded", detail: `${ops.latency}ms response latency`, priority: 2 });
         if (ops.api === "offline") items.push({ site, status: "offline", title: "API offline", detail: "API health check failed", priority: 1 });
         if (ops.api === "degraded") items.push({ site, status: "degraded", title: "API degraded", detail: hasApiUsageData(site) ? `${api.errorRate.toFixed(1)}% errors, ${api.p95}ms p95` : "Health or API connector needs wiring", priority: 2 });
-        if (ops.analytics !== "online" || ops.syncMinutes > 60) items.push({ site, status: "stale", title: "Data sync stale", detail: `Last sync ${ops.lastSync}`, priority: 3 });
-        if (ops.sslDays < 30) items.push({ site, status: "degraded", title: "SSL renewal soon", detail: `${ops.sslDays} days remaining`, priority: 3 });
+        if (site.connectors?.analytics?.status === "connected" && (ops.analytics !== "online" || ops.syncMinutes > 60)) {
+          items.push({ site, status: "stale", title: "Data sync stale", detail: `Last sync ${ops.lastSync}`, priority: 3 });
+        }
+        if (Number.isFinite(ops.sslDays) && ops.sslDays > 0 && ops.sslDays < 30) {
+          items.push({ site, status: "degraded", title: "SSL renewal soon", detail: `${ops.sslDays} days remaining`, priority: 3 });
+        }
         if (hasApiUsageData(site) && api.cost > 20 && api.totalRequests < 25000) items.push({ site, status: "degraded", title: "Cost watch", detail: `${formatMoney(api.cost)} in API cost on modest traffic`, priority: 4 });
         return items;
       }).sort((a, b) => a.priority - b.priority).slice(0, 7);
