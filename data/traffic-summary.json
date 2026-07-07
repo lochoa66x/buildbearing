@@ -1,0 +1,249 @@
+{
+  "updatedAt": "2026-07-07T02:08:08.325Z",
+  "windowDays": 30,
+  "source": "Vercel metrics",
+  "sites": [
+    {
+      "id": "matchseer",
+      "name": "MatchSeer",
+      "domain": "matchseer.com",
+      "provider": "Vercel Observability",
+      "mode": "request_derived",
+      "updatedAt": "2026-07-07T02:08:08.294Z",
+      "windowDays": 30,
+      "visits": 2741,
+      "visitors": 1974,
+      "requests": 127133,
+      "apiRequests": 109634,
+      "trend": -65.1,
+      "organic": 0,
+      "bounce": 0,
+      "avgSession": 0,
+      "pagesPerVisit": 1,
+      "adRpm": 0,
+      "fillRate": 0,
+      "viewability": 0,
+      "conversion": 0,
+      "searchImpressions": 0,
+      "queries": [],
+      "sources": {
+        "Organic": 0,
+        "Direct": 100,
+        "Referral": 0,
+        "Social": 0,
+        "Paid": 0
+      },
+      "countries": {
+        "Canada": 90,
+        "United States": 4,
+        "Japan": 1,
+        "Mexico": 1,
+        "Hong Kong SAR China": 1,
+        "Poland": 1,
+        "Other": 2
+      },
+      "spark": [
+        5592,
+        1938,
+        4344,
+        10104,
+        4761,
+        1561,
+        1382,
+        3299,
+        2207,
+        1745,
+        2481,
+        412
+      ],
+      "paths": [
+        {
+          "path": "/api/matches",
+          "requests": 106825
+        },
+        {
+          "path": "/",
+          "requests": 2615
+        },
+        {
+          "path": "/brand/matchseer-app-icon.svg",
+          "requests": 1345
+        },
+        {
+          "path": "/manifest.webmanifest",
+          "requests": 828
+        },
+        {
+          "path": "/api/traffic",
+          "requests": 573
+        },
+        {
+          "path": "/_next/static/chunks/1jq4o6yq14o4c.js",
+          "requests": 546
+        },
+        {
+          "path": "/_next/static/chunks/158myu8e_yme3.js",
+          "requests": 544
+        },
+        {
+          "path": "/_next/static/chunks/0c10vom5pdwi-.js",
+          "requests": 541
+        },
+        {
+          "path": "/_next/static/chunks/2nykiepra7i1k.js",
+          "requests": 541
+        },
+        {
+          "path": "/_next/static/chunks/turbopack-3891-bcvl-kf1.js",
+          "requests": 538
+        },
+        {
+          "path": "/api/cron/sync-market-pulse",
+          "requests": 518
+        },
+        {
+          "path": "/robots.txt",
+          "requests": 462
+        }
+      ],
+      "statusCodes": [
+        {
+          "status": "200",
+          "requests": 116692
+        },
+        {
+          "status": "403",
+          "requests": 4747
+        },
+        {
+          "status": "308",
+          "requests": 1665
+        },
+        {
+          "status": "304",
+          "requests": 1606
+        },
+        {
+          "status": "404",
+          "requests": 1182
+        },
+        {
+          "status": "201",
+          "requests": 556
+        },
+        {
+          "status": "503",
+          "requests": 520
+        },
+        {
+          "status": "401",
+          "requests": 61
+        },
+        {
+          "status": "500",
+          "requests": 21
+        },
+        {
+          "status": "206",
+          "requests": 19
+        },
+        {
+          "status": "202",
+          "requests": 16
+        },
+        {
+          "status": "302",
+          "requests": 16
+        }
+      ],
+      "api": {
+        "totalRequests": 109634,
+        "errorRate": 0.43,
+        "p95": 0,
+        "cost": 0,
+        "keys": 0,
+        "authFailures": 0,
+        "rateLimited": 0,
+        "endpoints": [
+          {
+            "route": "ALL /api/matches",
+            "requests": 106825,
+            "errorRate": 0,
+            "p95": 0,
+            "cost": 0,
+            "consumers": 0,
+            "signal": "Vercel requests"
+          },
+          {
+            "route": "ALL /api/traffic",
+            "requests": 573,
+            "errorRate": 0,
+            "p95": 0,
+            "cost": 0,
+            "consumers": 0,
+            "signal": "Vercel requests"
+          },
+          {
+            "route": "ALL /api/cron/sync-market-pulse",
+            "requests": 518,
+            "errorRate": 0,
+            "p95": 0,
+            "cost": 0,
+            "consumers": 0,
+            "signal": "Vercel requests"
+          },
+          {
+            "route": "ALL /api/admin/sync-football-data",
+            "requests": 343,
+            "errorRate": 0,
+            "p95": 0,
+            "cost": 0,
+            "consumers": 0,
+            "signal": "Vercel requests"
+          },
+          {
+            "route": "ALL /api/admin/sync-weather",
+            "requests": 278,
+            "errorRate": 0,
+            "p95": 0,
+            "cost": 0,
+            "consumers": 0,
+            "signal": "Vercel requests"
+          },
+          {
+            "route": "ALL /api/admin/sync-market-pulse",
+            "requests": 276,
+            "errorRate": 0,
+            "p95": 0,
+            "cost": 0,
+            "consumers": 0,
+            "signal": "Vercel requests"
+          },
+          {
+            "route": "ALL /api/admin/venue-candidates",
+            "requests": 239,
+            "errorRate": 0,
+            "p95": 0,
+            "cost": 0,
+            "consumers": 0,
+            "signal": "Vercel requests"
+          },
+          {
+            "route": "ALL /api/admin/traffic",
+            "requests": 192,
+            "errorRate": 0,
+            "p95": 0,
+            "cost": 0,
+            "consumers": 0,
+            "signal": "Vercel requests"
+          }
+        ],
+        "consumers": []
+      },
+      "notes": [
+        "Using Vercel request metrics because Web Analytics pageviews returned no data.",
+        "Visits are estimated from non-asset page requests until GA4 or Web Analytics visitor events are connected."
+      ]
+    }
+  ]
+}

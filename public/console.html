@@ -3010,10 +3010,10 @@
         auth: { status: "manual", provider: "public site" }
       },
       matchseer: {
-        website: { status: "pending", url: "https://matchseer.com/", note: "domain corrected" },
-        health: { status: "pending", url: "https://matchseer.com/api/health", note: "pending live check" },
-        apiBase: { status: "planned", url: "https://matchseer.com/api" },
-        analytics: { status: "pending", provider: "GA4/Vercel Analytics" },
+        website: { status: "connected", url: "https://matchseer.com/", note: "domain corrected and verified" },
+        health: { status: "missing", url: "https://matchseer.com/api/health", note: "returned 404" },
+        apiBase: { status: "connected", url: "https://matchseer.com/api" },
+        analytics: { status: "connected", provider: "Vercel Observability", note: "request-derived traffic feed" },
         search: { status: "pending", provider: "Google Search Console" },
         deploy: { status: "pending", provider: "Vercel project link" },
         auth: { status: "manual", provider: "public site" }
@@ -3079,6 +3079,12 @@
     };
 
     let liveUptimeReport = null;
+    const trafficFeedState = {
+      source: "No traffic feed",
+      updatedAt: null,
+      loaded: false,
+      message: "Traffic feed not connected."
+    };
 
     function enrichSiteWithConnections(site) {
       const opsApi = site.telemetry?.apiUsage === "connected" ? (opsApiData[site.id] || {}) : {};
@@ -3358,6 +3364,101 @@
         registryState.uptimeSource = "No uptime report";
         registryState.message = "Run uptime to create a fresh heartbeat.";
         renderConnectors();
+        return false;
+      }
+    }
+
+    function applyTrafficSummary(payload, updateState = true) {
+      const rows = Array.isArray(payload?.sites) ? payload.sites : [];
+      if (!rows.length) return false;
+      rows.forEach((snapshot) => {
+        const site = sites.find((item) => item.id === snapshot.id);
+        if (!site) return;
+
+        site.visits = Number(snapshot.visits || 0);
+        site.visitors = Number(snapshot.visitors || 0);
+        site.trend = Number(snapshot.trend || 0);
+        site.organic = Number(snapshot.organic || 0);
+        site.bounce = Number(snapshot.bounce || 0);
+        site.avgSession = Number(snapshot.avgSession || 0);
+        site.pagesPerVisit = Number(snapshot.pagesPerVisit || 1);
+        site.adRpm = Number(snapshot.adRpm || 0);
+        site.fillRate = Number(snapshot.fillRate || 0);
+        site.viewability = Number(snapshot.viewability || 0);
+        site.conversion = Number(snapshot.conversion || 0);
+        site.searchImpressions = Number(snapshot.searchImpressions || 0);
+        site.queries = Array.isArray(snapshot.queries) ? snapshot.queries : site.queries;
+        site.sources = snapshot.sources || site.sources;
+        site.countries = snapshot.countries || site.countries;
+        site.spark = Array.isArray(snapshot.spark) && snapshot.spark.length ? snapshot.spark : site.spark;
+        site.trafficMode = snapshot.mode || "traffic";
+        site.trafficProvider = snapshot.provider || payload.source || "traffic feed";
+        site.trafficNotes = Array.isArray(snapshot.notes) ? snapshot.notes : [];
+
+        site.telemetry = {
+          ...site.telemetry,
+          traffic: "connected",
+          geography: snapshot.countries ? "connected" : site.telemetry?.geography,
+          apiUsage: snapshot.api || snapshot.apiRequests ? "connected" : site.telemetry?.apiUsage
+        };
+
+        if (snapshot.api || snapshot.apiRequests) {
+          site.api = {
+            ...site.api,
+            ...(snapshot.api || {}),
+            totalRequests: Number(snapshot.api?.totalRequests || snapshot.apiRequests || 0)
+          };
+        }
+
+        const connectors = site.connectors || defaultConnectors(site);
+        connectors.analytics = {
+          ...connectors.analytics,
+          status: "connected",
+          provider: snapshot.provider || payload.source || "traffic feed",
+          note: snapshot.mode === "request_derived" ? "request-derived traffic feed" : "traffic feed connected"
+        };
+        if (snapshot.api || snapshot.apiRequests) {
+          connectors.apiBase = {
+            ...connectors.apiBase,
+            status: "connected",
+            url: connectors.apiBase?.url || `https://${site.domain}/api`,
+            note: `${formatNumber(snapshot.api?.totalRequests || snapshot.apiRequests || 0)} API requests in ${payload.windowDays || 30}d`
+          };
+        }
+        site.connectors = connectors;
+        site.ops = site.ops || {};
+        site.ops.analytics = "online";
+        site.ops.lastSync = shortTime(snapshot.updatedAt || payload.updatedAt);
+        site.ops.syncMinutes = snapshot.updatedAt || payload.updatedAt
+          ? Math.max(0, Math.round((Date.now() - new Date(snapshot.updatedAt || payload.updatedAt).getTime()) / 60000))
+          : 0;
+        if (site.ops.web !== "offline") site.ops.web = site.ops.web || "online";
+        site.ops.incident = `${site.trafficProvider} traffic connected.`;
+      });
+
+      if (updateState) {
+        trafficFeedState.source = payload.source || "traffic feed";
+        trafficFeedState.updatedAt = payload.updatedAt || null;
+        trafficFeedState.loaded = true;
+        trafficFeedState.message = `${rows.length} traffic snapshot${rows.length === 1 ? "" : "s"} loaded.`;
+      }
+      return true;
+    }
+
+    async function loadTrafficSummary(showToast = false) {
+      if (!isHostedMode()) return false;
+      try {
+        const response = await fetch(`/api/traffic-summary?ts=${Date.now()}`, { cache: "no-store" });
+        if (!response.ok) throw new Error(`traffic ${response.status}`);
+        const payload = await response.json();
+        const loaded = applyTrafficSummary(payload);
+        if (loaded && showToast) toast("Traffic feed loaded.");
+        render();
+        return loaded;
+      } catch (error) {
+        trafficFeedState.message = "Traffic API is unavailable.";
+        if (showToast) toast("Traffic feed is not available on this server.");
+        renderMetrics();
         return false;
       }
     }
@@ -4131,6 +4232,20 @@
           <div class="insight">
             <div class="insight-icon" style="background:#2c6fbb"><svg viewBox="0 0 24 24"><path d="M12 20h.01"/><path d="M12 4a8 8 0 0 1 8 8c0 3-2 4.5-4 5.5H8C6 16.5 4 15 4 12a8 8 0 0 1 8-8z"/></svg></div>
             <p>Traffic analytics is waiting for a real feed. Uptime, registry, and health signals are live; behavior insights will unlock after GA4 or Vercel Analytics is wired.</p>
+          </div>
+        `;
+        return;
+      }
+      if (site.trafficMode === "request_derived") {
+        $("#behaviorStats").innerHTML = [
+          ["Page requests", formatNumber(scaled(site, "visits"))],
+          ["API requests", hasApiUsageData(site) ? formatNumber(scaledApi(site, "totalRequests")) : "-"],
+          ["5xx rate", hasApiUsageData(site) ? `${(site.api?.errorRate || 0).toFixed(2)}%` : "-"]
+        ].map(([label, value]) => `<div class="mini-stat"><span>${label}</span><strong>${value}</strong></div>`).join("");
+        $("#insights").innerHTML = `
+          <div class="insight">
+            <div class="insight-icon" style="background:#2f8f70"><svg viewBox="0 0 24 24"><path d="M12 20h.01"/><path d="M12 4a8 8 0 0 1 8 8c0 3-2 4.5-4 5.5H8C6 16.5 4 15 4 12a8 8 0 0 1 8-8z"/></svg></div>
+            <p>${site.name} is using ${site.trafficProvider}. This is real Vercel request telemetry, so volume, API usage, and geography are live. Bounce, sessions, and source quality will unlock when Web Analytics or GA4 page events are connected.</p>
           </div>
         `;
         return;
@@ -4924,7 +5039,7 @@
     bindEvents();
     syncCalculatorWithSelected(false);
     render();
-    loadProjectRegistry().then(() => loadLiveUptimeReport());
+    loadProjectRegistry().then(() => Promise.all([loadLiveUptimeReport(), loadTrafficSummary()]));
   </script>
 </body>
 </html>

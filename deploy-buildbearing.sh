@@ -30,7 +30,7 @@ fi
 
 echo "Running local checks..."
 npm run check
-node -e 'JSON.parse(require("fs").readFileSync("vercel.json","utf8")); JSON.parse(require("fs").readFileSync("public/connection-registry.json","utf8")); JSON.parse(require("fs").readFileSync("public/live-uptime-status.json","utf8")); console.log("JSON ok");'
+node -e 'JSON.parse(require("fs").readFileSync("vercel.json","utf8")); JSON.parse(require("fs").readFileSync("public/connection-registry.json","utf8")); JSON.parse(require("fs").readFileSync("public/live-uptime-status.json","utf8")); JSON.parse(require("fs").readFileSync("data/traffic-summary.json","utf8")); console.log("JSON ok");'
 
 if [[ -f ".vercel/project.json" ]]; then
   echo

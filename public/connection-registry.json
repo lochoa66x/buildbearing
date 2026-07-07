@@ -35,10 +35,10 @@
     "domain": "matchseer.com",
     "role": "public_site",
     "connectors": {
-      "website": { "status": "pending", "url": "https://matchseer.com/", "note": "domain corrected" },
-      "health": { "status": "pending", "url": "https://matchseer.com/api/health", "note": "pending live check" },
-      "apiBase": { "status": "planned", "url": "https://matchseer.com/api" },
-      "analytics": { "status": "pending", "provider": "GA4/Vercel Analytics" },
+      "website": { "status": "connected", "url": "https://matchseer.com/", "note": "domain corrected and verified" },
+      "health": { "status": "missing", "url": "https://matchseer.com/api/health", "note": "returned 404" },
+      "apiBase": { "status": "connected", "url": "https://matchseer.com/api" },
+      "analytics": { "status": "connected", "provider": "Vercel Observability", "note": "request-derived traffic feed" },
       "search": { "status": "pending", "provider": "Google Search Console" },
       "deploy": { "status": "pending", "provider": "Vercel project link" },
       "auth": { "status": "manual", "provider": "public site" }

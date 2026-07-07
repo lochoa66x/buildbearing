@@ -64,6 +64,7 @@ export const config = {
     "/console.html",
     "/command-centre.html",
     "/api/registry",
+    "/api/traffic-summary",
     "/api/uptime-status",
     "/api/check-uptime"
   ],
