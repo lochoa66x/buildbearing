@@ -2772,17 +2772,17 @@
                   <li><span class="check-dot real">+</span>Health endpoint checks</li>
                   <li><span class="check-dot real">+</span>Local API server</li>
                   <li><span class="check-dot real">+</span>Latest uptime status</li>
+                  <li><span class="check-dot real">+</span>Vercel request metrics</li>
+                  <li><span class="check-dot real">+</span>Vercel deployment status</li>
                 </ul>
               </div>
               <div class="truth-list">
                 <h3>Needs connector <span class="status-dot degraded"></span></h3>
                 <ul>
-                  <li><span class="check-dot pending">!</span>Traffic analytics feed</li>
-                  <li><span class="check-dot pending">!</span>Visitor geography feed</li>
-                  <li><span class="check-dot pending">!</span>Search Console feed</li>
+                  <li><span class="check-dot pending">!</span>GA4 or Web Analytics visitor events</li>
+                  <li><span class="check-dot pending">!</span>Search Console credentials</li>
                   <li><span class="check-dot pending">!</span>Revenue source</li>
-                  <li><span class="check-dot pending">!</span>API usage feed</li>
-                  <li><span class="check-dot pending">!</span>Deployment provider feed</li>
+                  <li><span class="check-dot pending">!</span>API consumer identity feed</li>
                 </ul>
               </div>
             </div>
@@ -2798,13 +2798,13 @@
             <div class="panel-body">
               <ol class="milestone-list">
                 <li><span class="number-dot">1</span>Add `/api/health` to all projects</li>
-                <li><span class="number-dot">2</span>Connect analytics</li>
-                <li><span class="number-dot">3</span>Connect Search Console</li>
-                <li><span class="number-dot">4</span>Add API usage reporting</li>
-                <li><span class="number-dot">5</span>Add production deployment links</li>
-                <li><span class="number-dot">6</span>Add deployment checks</li>
+                <li><span class="number-dot">2</span>Authorize Google Search Console</li>
+                <li><span class="number-dot">3</span>Add GA4 or Web Analytics events</li>
+                <li><span class="number-dot">4</span>Add API consumer identity reporting</li>
+                <li><span class="number-dot">5</span>Add revenue source</li>
+                <li><span class="number-dot">6</span>Add project notes and ownership</li>
                 <li><span class="number-dot">7</span>Add daily AI briefing</li>
-                <li><span class="number-dot">8</span>Add project notes and ownership</li>
+                <li><span class="number-dot">8</span>Add cost tracking</li>
                 <li><span class="number-dot">9</span>Add retirement archive history</li>
                 <li><span class="number-dot">10</span>Seed the future SaaS version</li>
               </ol>
@@ -2984,8 +2984,10 @@
       { id: "matchseer", name: "MatchSeer", domain: "matchseer.com" },
       { id: "niftytoolshub", name: "NiftyToolsHub", domain: "niftytoolshub.com" },
       { id: "chronovisorai", name: "ChronovisorAI", domain: "chronovisorai.com" },
-      { id: "vertmex", name: "Vertmex", domain: "vertmex.com" },
-      { id: "keyscout", name: "KeyScout", domain: "keyscout.app" }
+      { id: "vertmex", name: "Vertmex", domain: "vertmex.ca" },
+      { id: "keyscout", name: "KeyScout", domain: "keyscout.app" },
+      { id: "oddskies", name: "OddSkies", domain: "oddskies.com" },
+      { id: "yocomprolocal", name: "YoComproLocal", domain: "yocomprolocal.com.mx" }
     ];
 
     const opsApiData = {};
@@ -2997,7 +2999,7 @@
         apiBase: { status: "planned", url: "https://www.buildbearing.com/api" },
         analytics: { status: "private", provider: "internal only" },
         search: { status: "noindex", provider: "robots noindex" },
-        deploy: { status: "pending", provider: "Vercel/Cloudflare TBD" },
+        deploy: { status: "connected", provider: "Vercel", project: "buildbearing" },
         auth: { status: "planned", provider: "server-side password gate" }
       },
       voynichtech: {
@@ -3006,7 +3008,7 @@
         apiBase: { status: "planned", url: "https://voynichtech.ca/api" },
         analytics: { status: "pending", provider: "GA4/Vercel Analytics" },
         search: { status: "pending", provider: "Google Search Console" },
-        deploy: { status: "pending", provider: "Vercel project link" },
+        deploy: { status: "pending", provider: "Deployment provider TBD" },
         auth: { status: "manual", provider: "public site" }
       },
       matchseer: {
@@ -3015,43 +3017,61 @@
         apiBase: { status: "connected", url: "https://matchseer.com/api" },
         analytics: { status: "connected", provider: "Vercel Observability", note: "request-derived traffic feed" },
         search: { status: "pending", provider: "Google Search Console" },
-        deploy: { status: "pending", provider: "Vercel project link" },
+        deploy: { status: "connected", provider: "Vercel", project: "matchseer" },
         auth: { status: "manual", provider: "public site" }
       },
       niftytoolshub: {
         website: { status: "connected", url: "https://niftytoolshub.com/" },
         health: { status: "missing", url: "https://niftytoolshub.com/api/health", note: "returned 404" },
         apiBase: { status: "planned", url: "https://niftytoolshub.com/api" },
-        analytics: { status: "pending", provider: "GA4/Vercel Analytics" },
+        analytics: { status: "connected", provider: "Vercel Observability", note: "request-derived traffic feed" },
         search: { status: "pending", provider: "Google Search Console" },
-        deploy: { status: "pending", provider: "Vercel project link" },
+        deploy: { status: "connected", provider: "Vercel", project: "niftytoolshub" },
         auth: { status: "manual", provider: "public site" }
       },
       chronovisorai: {
         website: { status: "connected", url: "https://chronovisorai.com/" },
         health: { status: "connected", url: "https://chronovisorai.com/api/health" },
         apiBase: { status: "connected", url: "https://chronovisorai.com/api" },
-        analytics: { status: "pending", provider: "GA4/Vercel Analytics" },
+        analytics: { status: "connected", provider: "Vercel Observability", note: "request-derived traffic feed" },
         search: { status: "pending", provider: "Google Search Console" },
-        deploy: { status: "pending", provider: "Vercel project link" },
+        deploy: { status: "connected", provider: "Vercel", project: "chronovisor" },
         auth: { status: "manual", provider: "public site" }
       },
       vertmex: {
-        website: { status: "planned", url: "https://vertmex.com/" },
-        health: { status: "planned", url: "https://vertmex.com/api/health" },
-        apiBase: { status: "planned", url: "https://vertmex.com/api" },
-        analytics: { status: "pending", provider: "GA4/Vercel Analytics" },
+        website: { status: "connected", url: "https://www.vertmex.ca/" },
+        health: { status: "planned", url: "https://www.vertmex.ca/api/health" },
+        apiBase: { status: "planned", url: "https://www.vertmex.ca/api" },
+        analytics: { status: "connected", provider: "Vercel Observability", note: "request-derived traffic feed" },
         search: { status: "pending", provider: "Google Search Console" },
-        deploy: { status: "pending", provider: "Vercel project link" },
+        deploy: { status: "connected", provider: "Vercel", project: "vertmex" },
         auth: { status: "manual", provider: "public site" }
       },
       keyscout: {
         website: { status: "connected", url: "https://keyscout.app/" },
         health: { status: "missing", url: "https://keyscout.app/api/health", note: "returned 404" },
         apiBase: { status: "planned", url: "https://keyscout.app/api" },
-        analytics: { status: "pending", provider: "GA4/Vercel Analytics" },
+        analytics: { status: "connected", provider: "Vercel Observability", note: "request-derived traffic feed" },
         search: { status: "pending", provider: "Google Search Console" },
-        deploy: { status: "pending", provider: "Vercel project link" },
+        deploy: { status: "connected", provider: "Vercel", project: "keyscout" },
+        auth: { status: "manual", provider: "public site" }
+      },
+      oddskies: {
+        website: { status: "connected", url: "https://oddskies.com/" },
+        health: { status: "planned", url: "https://oddskies.com/api/health" },
+        apiBase: { status: "planned", url: "https://oddskies.com/api" },
+        analytics: { status: "connected", provider: "Vercel Observability", note: "request-derived traffic feed" },
+        search: { status: "pending", provider: "Google Search Console" },
+        deploy: { status: "connected", provider: "Vercel", project: "oddskies" },
+        auth: { status: "manual", provider: "public site" }
+      },
+      yocomprolocal: {
+        website: { status: "connected", url: "https://yocomprolocal.com.mx/" },
+        health: { status: "planned", url: "https://yocomprolocal.com.mx/api/health" },
+        apiBase: { status: "planned", url: "https://yocomprolocal.com.mx/api" },
+        analytics: { status: "connected", provider: "Vercel Observability", note: "request-derived traffic feed" },
+        search: { status: "pending", provider: "Google Search Console" },
+        deploy: { status: "connected", provider: "Vercel", project: "yocomprolocal" },
         auth: { status: "manual", provider: "public site" }
       }
     };
@@ -3425,6 +3445,18 @@
             note: `${formatNumber(snapshot.api?.totalRequests || snapshot.apiRequests || 0)} API requests in ${payload.windowDays || 30}d`
           };
         }
+        if (snapshot.deployment) {
+          const deployment = snapshot.deployment;
+          connectors.deploy = {
+            ...connectors.deploy,
+            status: deployment.status || "pending",
+            provider: deployment.provider || "Vercel",
+            project: deployment.project || connectors.deploy?.project,
+            url: deployment.inspectorUrl || deployment.url || connectors.deploy?.url,
+            note: deployment.note || deployment.readyState || "Production deployment"
+          };
+          site.deployment = deployment;
+        }
         site.connectors = connectors;
         site.ops = site.ops || {};
         site.ops.analytics = "online";
@@ -3433,7 +3465,13 @@
           ? Math.max(0, Math.round((Date.now() - new Date(snapshot.updatedAt || payload.updatedAt).getTime()) / 60000))
           : 0;
         if (site.ops.web !== "offline") site.ops.web = site.ops.web || "online";
-        site.ops.incident = `${site.trafficProvider} traffic connected.`;
+        if (snapshot.deployment) {
+          const deployment = snapshot.deployment;
+          site.ops.deploy = deployment.status === "connected"
+            ? `ready ${shortTime(deployment.readyAt || deployment.createdAt)}`
+            : (deployment.readyState || deployment.status || "pending").toLowerCase();
+        }
+        site.ops.incident = `${site.trafficProvider} traffic${snapshot.deployment ? " and Vercel deploy" : ""} connected.`;
       });
 
       if (updateState) {
@@ -3459,6 +3497,65 @@
         trafficFeedState.message = "Traffic API is unavailable.";
         if (showToast) toast("Traffic feed is not available on this server.");
         renderMetrics();
+        return false;
+      }
+    }
+
+    function normalizeSearchQuery(row) {
+      if (Array.isArray(row)) return row;
+      return [
+        row.query || row.keyword || "",
+        row.engine || "Google",
+        Number(row.clicks || 0),
+        Number(row.impressions || 0),
+        Number(row.ctr || 0),
+        Number(row.position || row.avgPosition || 0)
+      ];
+    }
+
+    function applySearchSummary(payload) {
+      const rows = Array.isArray(payload?.sites) ? payload.sites : [];
+      if (!rows.length) return false;
+      rows.forEach((snapshot) => {
+        const site = sites.find((item) => item.id === snapshot.id);
+        if (!site) return;
+        const queries = Array.isArray(snapshot.queries) ? snapshot.queries.map(normalizeSearchQuery).filter((query) => query[0]) : [];
+        const impressions = Number(snapshot.impressions || queries.reduce((sum, query) => sum + Number(query[3] || 0), 0));
+        const clicks = Number(snapshot.clicks || queries.reduce((sum, query) => sum + Number(query[2] || 0), 0));
+        const connected = queries.length > 0 || impressions > 0 || clicks > 0;
+
+        if (connected) {
+          site.queries = queries;
+          site.searchImpressions = impressions;
+          site.organic = site.visits ? Math.round((clicks / Math.max(site.visits, 1)) * 100) : site.organic;
+          site.telemetry = { ...site.telemetry, search: "connected" };
+        }
+
+        const connectors = site.connectors || defaultConnectors(site);
+        connectors.search = {
+          ...connectors.search,
+          status: connected ? "connected" : "pending",
+          provider: "Google Search Console",
+          property: snapshot.property || connectors.search?.property,
+          note: connected ? `${formatNumber(clicks)} clicks / ${formatNumber(impressions)} impressions` : (payload.message || "Search Console credentials required")
+        };
+        site.connectors = connectors;
+      });
+      return true;
+    }
+
+    async function loadSearchSummary(showToast = false) {
+      if (!isHostedMode()) return false;
+      try {
+        const response = await fetch(`/api/search-summary?ts=${Date.now()}`, { cache: "no-store" });
+        if (!response.ok) throw new Error(`search ${response.status}`);
+        const payload = await response.json();
+        const loaded = applySearchSummary(payload);
+        if (loaded && showToast) toast(payload.status === "credentials_required" ? "Search Console is ready for credentials." : "Search feed loaded.");
+        render();
+        return loaded;
+      } catch (error) {
+        if (showToast) toast("Search Console feed is not available on this server.");
         return false;
       }
     }
@@ -5039,7 +5136,7 @@
     bindEvents();
     syncCalculatorWithSelected(false);
     render();
-    loadProjectRegistry().then(() => Promise.all([loadLiveUptimeReport(), loadTrafficSummary()]));
+    loadProjectRegistry().then(() => Promise.all([loadLiveUptimeReport(), loadTrafficSummary(), loadSearchSummary()]));
   </script>
 </body>
 </html>

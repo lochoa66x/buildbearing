@@ -1,0 +1,16 @@
+{
+  "updatedAt": null,
+  "windowDays": 30,
+  "source": "Google Search Console",
+  "status": "credentials_required",
+  "message": "Connect Google Search Console properties or provide an export to populate search queries, clicks, impressions, CTR, and average position.",
+  "sites": [
+    { "id": "matchseer", "property": "sc-domain:matchseer.com", "status": "pending_credentials", "queries": [] },
+    { "id": "niftytoolshub", "property": "sc-domain:niftytoolshub.com", "status": "pending_credentials", "queries": [] },
+    { "id": "chronovisorai", "property": "sc-domain:chronovisorai.com", "status": "pending_credentials", "queries": [] },
+    { "id": "vertmex", "property": "sc-domain:vertmex.ca", "status": "pending_credentials", "queries": [] },
+    { "id": "keyscout", "property": "sc-domain:keyscout.app", "status": "pending_credentials", "queries": [] },
+    { "id": "oddskies", "property": "sc-domain:oddskies.com", "status": "pending_credentials", "queries": [] },
+    { "id": "yocomprolocal", "property": "sc-domain:yocomprolocal.com.mx", "status": "pending_credentials", "queries": [] }
+  ]
+}

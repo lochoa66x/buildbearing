@@ -9,10 +9,53 @@ const outUrl = new URL("../data/traffic-summary.json", import.meta.url);
 
 const projects = [
   {
+    id: "buildbearing",
+    name: "command.centre",
+    domain: "buildbearing.com",
+    vercelProject: process.env.BUILDBEARING_VERCEL_PROJECT || "buildbearing",
+    internal: true
+  },
+  {
     id: "matchseer",
     name: "MatchSeer",
     domain: "matchseer.com",
     vercelProject: process.env.MATCHSEER_VERCEL_PROJECT || "matchseer"
+  },
+  {
+    id: "niftytoolshub",
+    name: "NiftyToolsHub",
+    domain: "niftytoolshub.com",
+    vercelProject: process.env.NIFTYTOOLSHUB_VERCEL_PROJECT || "niftytoolshub"
+  },
+  {
+    id: "chronovisorai",
+    name: "ChronovisorAI",
+    domain: "chronovisorai.com",
+    vercelProject: process.env.CHRONOVISORAI_VERCEL_PROJECT || "chronovisor"
+  },
+  {
+    id: "vertmex",
+    name: "Vertmex",
+    domain: "vertmex.ca",
+    vercelProject: process.env.VERTMEX_VERCEL_PROJECT || "vertmex"
+  },
+  {
+    id: "keyscout",
+    name: "KeyScout",
+    domain: "keyscout.app",
+    vercelProject: process.env.KEYSCOUT_VERCEL_PROJECT || "keyscout"
+  },
+  {
+    id: "oddskies",
+    name: "OddSkies",
+    domain: "oddskies.com",
+    vercelProject: process.env.ODDSKIES_VERCEL_PROJECT || "oddskies"
+  },
+  {
+    id: "yocomprolocal",
+    name: "YoComproLocal",
+    domain: "yocomprolocal.com.mx",
+    vercelProject: process.env.YOCOMPROLOCAL_VERCEL_PROJECT || "yocomprolocal"
   }
 ];
 
@@ -20,10 +63,12 @@ function metricValue(row) {
   return Number(row?.vercel_request_count_sum || row?.vercel_analytics_pageview_count_sum || 0);
 }
 
-function jsonFromVercel(stdout) {
-  const start = stdout.indexOf("{");
-  if (start < 0) throw new Error("Vercel metrics did not return JSON.");
-  return JSON.parse(stdout.slice(start));
+function jsonFromCli(stdout) {
+  const objectStart = stdout.indexOf("{");
+  const arrayStart = stdout.indexOf("[");
+  const starts = [objectStart, arrayStart].filter((index) => index >= 0);
+  if (!starts.length) throw new Error("Vercel did not return JSON.");
+  return JSON.parse(stdout.slice(Math.min(...starts)));
 }
 
 async function vercelMetric(project, metric, options = []) {
@@ -40,10 +85,25 @@ async function vercelMetric(project, metric, options = []) {
   ];
   const { stdout } = await execFileAsync("vercel", args, {
     maxBuffer: 1024 * 1024 * 8,
-    timeout: 30000
+    timeout: 45000
   });
-  const payload = jsonFromVercel(stdout);
+  const payload = jsonFromCli(stdout);
   if (payload.error) throw new Error(payload.error.message || payload.error.code || "Vercel metrics error");
+  return payload;
+}
+
+async function vercelApi(endpoint) {
+  const { stdout } = await execFileAsync("vercel", [
+    "api",
+    endpoint,
+    "--scope", teamScope,
+    "--raw"
+  ], {
+    maxBuffer: 1024 * 1024 * 8,
+    timeout: 45000
+  });
+  const payload = jsonFromCli(stdout);
+  if (payload.error) throw new Error(payload.error.message || payload.error.code || "Vercel API error");
   return payload;
 }
 
@@ -52,6 +112,14 @@ async function optionalMetric(project, metric, options = []) {
     return await vercelMetric(project, metric, options);
   } catch (error) {
     return { error: error.message, summary: [], data: [] };
+  }
+}
+
+async function optionalApi(endpoint) {
+  try {
+    return await vercelApi(endpoint);
+  } catch (error) {
+    return { error: error.message };
   }
 }
 
@@ -158,14 +226,69 @@ function apiEndpoints(pathSummary) {
     }));
 }
 
+function isoFromMs(value) {
+  const number = Number(value || 0);
+  return Number.isFinite(number) && number > 0 ? new Date(number).toISOString() : null;
+}
+
+function deploymentStatus(deployment) {
+  if (!deployment) return "missing";
+  if (deployment.readyState === "READY" || deployment.state === "READY") return "connected";
+  if (deployment.readyState === "ERROR" || deployment.state === "ERROR") return "degraded";
+  if (deployment.readyState === "BUILDING" || deployment.state === "BUILDING") return "pending";
+  return "pending";
+}
+
+function deploymentLabel(deployment) {
+  if (!deployment) return "unlinked";
+  const state = deployment.readyState || deployment.state || "UNKNOWN";
+  const ref = deployment.meta?.githubCommitRef;
+  return ref ? `${state.toLowerCase()} (${ref})` : state.toLowerCase();
+}
+
+function deploymentSnapshot(project, payload) {
+  const deployment = payload.deployments?.[0];
+  if (!deployment) {
+    return {
+      status: "missing",
+      provider: "Vercel",
+      project: project.vercelProject,
+      note: payload.error || "No production deployment found"
+    };
+  }
+  const commitSha = deployment.meta?.githubCommitSha || "";
+  return {
+    status: deploymentStatus(deployment),
+    provider: "Vercel",
+    project: project.vercelProject,
+    url: deployment.url ? `https://${deployment.url}` : "",
+    inspectorUrl: deployment.inspectorUrl || "",
+    deploymentId: deployment.uid || "",
+    readyState: deployment.readyState || deployment.state || "",
+    readySubstate: deployment.readySubstate || "",
+    target: deployment.target || "production",
+    createdAt: isoFromMs(deployment.createdAt || deployment.created),
+    readyAt: isoFromMs(deployment.ready),
+    aliasAssignedAt: isoFromMs(deployment.aliasAssigned),
+    gitRef: deployment.meta?.githubCommitRef || "",
+    gitRepo: deployment.meta?.githubCommitRepo || "",
+    commitSha,
+    commitShort: commitSha ? commitSha.slice(0, 7) : "",
+    commitMessage: deployment.meta?.githubCommitMessage || "",
+    label: deploymentLabel(deployment),
+    note: deployment.meta?.githubCommitMessage || deployment.readyState || deployment.state || "Production deployment"
+  };
+}
+
 async function buildProjectSnapshot(project) {
-  const [dailyRequests, pathSummary, countrySummary, statusSummary, referrerSummary, analyticsPageviews] = await Promise.all([
+  const [dailyRequests, pathSummary, countrySummary, statusSummary, referrerSummary, analyticsPageviews, deploymentPayload] = await Promise.all([
     vercelMetric(project, "vercel.request.count", ["--granularity", "1d"]),
     vercelMetric(project, "vercel.request.count", ["--group-by", "request_path", "--limit", "25"]),
     vercelMetric(project, "vercel.request.count", ["--group-by", "client_ip_country", "--limit", "8"]),
     vercelMetric(project, "vercel.request.count", ["--group-by", "http_status", "--limit", "12"]),
     optionalMetric(project, "vercel.request.count", ["--group-by", "referrer_hostname", "--limit", "12"]),
-    optionalMetric(project, "vercel.analytics_pageview.count", ["--granularity", "1d"])
+    optionalMetric(project, "vercel.analytics_pageview.count", ["--granularity", "1d"]),
+    optionalApi(`/v6/deployments?projectId=${encodeURIComponent(project.vercelProject)}&limit=1&target=production`)
   ]);
 
   const totalRequests = summaryTotal(dailyRequests);
@@ -173,6 +296,7 @@ async function buildProjectSnapshot(project) {
   const estimatedPageViews = vercelAnalyticsViews || pageRequestTotal(pathSummary);
   const apiRequests = apiRequestTotal(pathSummary);
   const statusErrorRate = errorRate(statusSummary, totalRequests);
+  const deployment = deploymentSnapshot(project, deploymentPayload);
 
   return {
     id: project.id,
@@ -202,6 +326,7 @@ async function buildProjectSnapshot(project) {
     spark: sparkFromDaily(dailyRequests),
     paths: topPaths(pathSummary),
     statusCodes: (statusSummary.summary || []).map((row) => ({ status: row.http_status, requests: metricValue(row) })),
+    deployment,
     api: {
       totalRequests: apiRequests,
       errorRate: statusErrorRate,
@@ -217,21 +342,25 @@ async function buildProjectSnapshot(project) {
       vercelAnalyticsViews
         ? "Vercel Web Analytics pageviews are available."
         : "Using Vercel request metrics because Web Analytics pageviews returned no data.",
-      "Visits are estimated from non-asset page requests until GA4 or Web Analytics visitor events are connected."
+      "Visits are estimated from non-asset page requests until GA4 or Web Analytics visitor events are connected.",
+      deployment.status === "connected"
+        ? `Latest production deployment is ${deployment.readyState || "READY"}${deployment.commitShort ? ` at ${deployment.commitShort}` : ""}.`
+        : "Production deployment needs review."
     ]
   };
 }
 
 const sites = [];
 for (const project of projects) {
+  console.log(`Fetching Vercel metrics for ${project.name}...`);
   sites.push(await buildProjectSnapshot(project));
 }
 
 await fs.writeFile(outUrl, `${JSON.stringify({
   updatedAt: new Date().toISOString(),
   windowDays,
-  source: "Vercel metrics",
+  source: "Vercel metrics + deployments",
   sites
 }, null, 2)}\n`);
 
-console.log(`Wrote ${outUrl.pathname} with ${sites.length} site traffic snapshot.`);
+console.log(`Wrote ${outUrl.pathname} with ${sites.length} site traffic/deployment snapshots.`);

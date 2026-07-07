@@ -10,7 +10,7 @@
       "apiBase": { "status": "planned", "url": "https://www.buildbearing.com/api" },
       "analytics": { "status": "private", "provider": "internal only" },
       "search": { "status": "noindex", "provider": "robots noindex" },
-      "deploy": { "status": "pending", "provider": "Vercel/Cloudflare TBD" },
+      "deploy": { "status": "connected", "provider": "Vercel", "project": "buildbearing" },
       "auth": { "status": "planned", "provider": "server-side password gate" }
     }
   },
@@ -25,7 +25,7 @@
       "apiBase": { "status": "planned", "url": "https://voynichtech.ca/api" },
       "analytics": { "status": "pending", "provider": "GA4/Vercel Analytics" },
       "search": { "status": "pending", "provider": "Google Search Console" },
-      "deploy": { "status": "pending", "provider": "Vercel project link" },
+      "deploy": { "status": "pending", "provider": "Deployment provider TBD" },
       "auth": { "status": "manual", "provider": "public site" }
     }
   },
@@ -40,7 +40,7 @@
       "apiBase": { "status": "connected", "url": "https://matchseer.com/api" },
       "analytics": { "status": "connected", "provider": "Vercel Observability", "note": "request-derived traffic feed" },
       "search": { "status": "pending", "provider": "Google Search Console" },
-      "deploy": { "status": "pending", "provider": "Vercel project link" },
+      "deploy": { "status": "connected", "provider": "Vercel", "project": "matchseer" },
       "auth": { "status": "manual", "provider": "public site" }
     }
   },
@@ -53,9 +53,9 @@
       "website": { "status": "connected", "url": "https://niftytoolshub.com/" },
       "health": { "status": "missing", "url": "https://niftytoolshub.com/api/health", "note": "returned 404" },
       "apiBase": { "status": "planned", "url": "https://niftytoolshub.com/api" },
-      "analytics": { "status": "pending", "provider": "GA4/Vercel Analytics" },
+      "analytics": { "status": "connected", "provider": "Vercel Observability", "note": "request-derived traffic feed" },
       "search": { "status": "pending", "provider": "Google Search Console" },
-      "deploy": { "status": "pending", "provider": "Vercel project link" },
+      "deploy": { "status": "connected", "provider": "Vercel", "project": "niftytoolshub" },
       "auth": { "status": "manual", "provider": "public site" }
     }
   },
@@ -68,24 +68,24 @@
       "website": { "status": "connected", "url": "https://chronovisorai.com/" },
       "health": { "status": "connected", "url": "https://chronovisorai.com/api/health" },
       "apiBase": { "status": "connected", "url": "https://chronovisorai.com/api" },
-      "analytics": { "status": "pending", "provider": "GA4/Vercel Analytics" },
+      "analytics": { "status": "connected", "provider": "Vercel Observability", "note": "request-derived traffic feed" },
       "search": { "status": "pending", "provider": "Google Search Console" },
-      "deploy": { "status": "pending", "provider": "Vercel project link" },
+      "deploy": { "status": "connected", "provider": "Vercel", "project": "chronovisor" },
       "auth": { "status": "manual", "provider": "public site" }
     }
   },
   {
     "id": "vertmex",
     "name": "Vertmex",
-    "domain": "vertmex.com",
+    "domain": "vertmex.ca",
     "role": "public_site",
     "connectors": {
-      "website": { "status": "planned", "url": "https://vertmex.com/" },
-      "health": { "status": "planned", "url": "https://vertmex.com/api/health" },
-      "apiBase": { "status": "planned", "url": "https://vertmex.com/api" },
-      "analytics": { "status": "pending", "provider": "GA4/Vercel Analytics" },
+      "website": { "status": "connected", "url": "https://www.vertmex.ca/" },
+      "health": { "status": "planned", "url": "https://www.vertmex.ca/api/health" },
+      "apiBase": { "status": "planned", "url": "https://www.vertmex.ca/api" },
+      "analytics": { "status": "connected", "provider": "Vercel Observability", "note": "request-derived traffic feed" },
       "search": { "status": "pending", "provider": "Google Search Console" },
-      "deploy": { "status": "pending", "provider": "Vercel project link" },
+      "deploy": { "status": "connected", "provider": "Vercel", "project": "vertmex" },
       "auth": { "status": "manual", "provider": "public site" }
     }
   },
@@ -98,9 +98,39 @@
       "website": { "status": "connected", "url": "https://keyscout.app/" },
       "health": { "status": "missing", "url": "https://keyscout.app/api/health", "note": "returned 404" },
       "apiBase": { "status": "planned", "url": "https://keyscout.app/api" },
-      "analytics": { "status": "pending", "provider": "GA4/Vercel Analytics" },
+      "analytics": { "status": "connected", "provider": "Vercel Observability", "note": "request-derived traffic feed" },
       "search": { "status": "pending", "provider": "Google Search Console" },
-      "deploy": { "status": "pending", "provider": "Vercel project link" },
+      "deploy": { "status": "connected", "provider": "Vercel", "project": "keyscout" },
+      "auth": { "status": "manual", "provider": "public site" }
+    }
+  },
+  {
+    "id": "oddskies",
+    "name": "OddSkies",
+    "domain": "oddskies.com",
+    "role": "public_site",
+    "connectors": {
+      "website": { "status": "connected", "url": "https://oddskies.com/" },
+      "health": { "status": "planned", "url": "https://oddskies.com/api/health" },
+      "apiBase": { "status": "planned", "url": "https://oddskies.com/api" },
+      "analytics": { "status": "connected", "provider": "Vercel Observability", "note": "request-derived traffic feed" },
+      "search": { "status": "pending", "provider": "Google Search Console" },
+      "deploy": { "status": "connected", "provider": "Vercel", "project": "oddskies" },
+      "auth": { "status": "manual", "provider": "public site" }
+    }
+  },
+  {
+    "id": "yocomprolocal",
+    "name": "YoComproLocal",
+    "domain": "yocomprolocal.com.mx",
+    "role": "public_site",
+    "connectors": {
+      "website": { "status": "connected", "url": "https://yocomprolocal.com.mx/" },
+      "health": { "status": "planned", "url": "https://yocomprolocal.com.mx/api/health" },
+      "apiBase": { "status": "planned", "url": "https://yocomprolocal.com.mx/api" },
+      "analytics": { "status": "connected", "provider": "Vercel Observability", "note": "request-derived traffic feed" },
+      "search": { "status": "pending", "provider": "Google Search Console" },
+      "deploy": { "status": "connected", "provider": "Vercel", "project": "yocomprolocal" },
       "auth": { "status": "manual", "provider": "public site" }
     }
   }
