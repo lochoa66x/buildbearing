@@ -99,7 +99,9 @@ npm run refresh:search
 
 The refresh uses the last finalized 30-day Search Console window and writes
 queries, clicks, impressions, CTR, and average position for the connected
-properties.
+properties. To publish the refreshed private snapshot to production, deploy this
+local package after the refresh; GitHub-only deploys intentionally do not include
+`data/search-summary.json`.
 
 ## Next Production Improvements
 
