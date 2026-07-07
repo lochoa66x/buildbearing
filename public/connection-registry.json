@@ -32,12 +32,12 @@
   {
     "id": "matchseer",
     "name": "MatchSeer",
-    "domain": "matchseer.ca",
+    "domain": "matchseer.com",
     "role": "public_site",
     "connectors": {
-      "website": { "status": "unreachable", "url": "https://matchseer.ca/", "note": "curl returned 000" },
-      "health": { "status": "unreachable", "url": "https://matchseer.ca/api/health", "note": "curl returned 000" },
-      "apiBase": { "status": "planned", "url": "https://matchseer.ca/api" },
+      "website": { "status": "pending", "url": "https://matchseer.com/", "note": "domain corrected from matchseer.ca" },
+      "health": { "status": "pending", "url": "https://matchseer.com/api/health", "note": "pending live check" },
+      "apiBase": { "status": "planned", "url": "https://matchseer.com/api" },
       "analytics": { "status": "pending", "provider": "GA4/Vercel Analytics" },
       "search": { "status": "pending", "provider": "Google Search Console" },
       "deploy": { "status": "pending", "provider": "Vercel project link" },

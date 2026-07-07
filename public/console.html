@@ -2162,7 +2162,7 @@
       </div>
       <div class="gate-domains" aria-label="Connected properties">
         <span class="domain-chip"><span class="status-dot online"></span>voynichtech.ca</span>
-        <span class="domain-chip"><span class="status-dot offline"></span>matchseer.ca</span>
+        <span class="domain-chip"><span class="status-dot pending"></span>matchseer.com</span>
         <span class="domain-chip"><span class="status-dot online"></span>niftytoolshub.com</span>
         <span class="domain-chip"><span class="status-dot online"></span>chronovisorai.com</span>
         <span class="domain-chip"><span class="status-dot online"></span>keyscout.app</span>
@@ -2981,7 +2981,7 @@
     let sites = [
       { id: "buildbearing", name: "command.centre", domain: "buildbearing.com", internal: true },
       { id: "voynichtech", name: "VoynichTech", domain: "voynichtech.ca" },
-      { id: "matchseer", name: "MatchSeer", domain: "matchseer.ca" },
+      { id: "matchseer", name: "MatchSeer", domain: "matchseer.com" },
       { id: "niftytoolshub", name: "NiftyToolsHub", domain: "niftytoolshub.com" },
       { id: "chronovisorai", name: "ChronovisorAI", domain: "chronovisorai.com" },
       { id: "vertmex", name: "Vertmex", domain: "vertmex.com" },
@@ -3010,9 +3010,9 @@
         auth: { status: "manual", provider: "public site" }
       },
       matchseer: {
-        website: { status: "unreachable", url: "https://matchseer.ca/", note: "curl returned 000" },
-        health: { status: "unreachable", url: "https://matchseer.ca/api/health", note: "curl returned 000" },
-        apiBase: { status: "planned", url: "https://matchseer.ca/api" },
+        website: { status: "pending", url: "https://matchseer.com/", note: "domain corrected from matchseer.ca" },
+        health: { status: "pending", url: "https://matchseer.com/api/health", note: "pending live check" },
+        apiBase: { status: "planned", url: "https://matchseer.com/api" },
         analytics: { status: "pending", provider: "GA4/Vercel Analytics" },
         search: { status: "pending", provider: "Google Search Console" },
         deploy: { status: "pending", provider: "Vercel project link" },
