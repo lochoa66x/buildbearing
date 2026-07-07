@@ -1,13 +1,13 @@
 {
   "generatedBy": "buildbearing-command-centre",
-  "checkedAt": "2026-07-07T03:01:39.486Z",
-  "durationMs": 2505,
+  "checkedAt": "2026-07-07T12:12:22.269Z",
+  "durationMs": 3335,
   "summary": {
     "total": 9,
     "websitesConnected": 9,
-    "healthConnected": 1,
+    "healthConnected": 2,
     "unreachable": 0,
-    "missingHealth": 8,
+    "missingHealth": 7,
     "degraded": 0
   },
   "projects": [
@@ -21,9 +21,9 @@
         "url": "https://www.buildbearing.com/",
         "finalUrl": "https://www.buildbearing.com/",
         "statusCode": 200,
-        "responseTimeMs": 307,
-        "sslDays": 52,
-        "note": "200 in 307ms",
+        "responseTimeMs": 249,
+        "sslDays": 51,
+        "note": "200 in 249ms",
         "redirectChain": []
       },
       "health": {
@@ -31,8 +31,8 @@
         "url": "https://www.buildbearing.com/api/health",
         "finalUrl": "https://www.buildbearing.com/api/health",
         "statusCode": 404,
-        "responseTimeMs": 138,
-        "sslDays": 52,
+        "responseTimeMs": 83,
+        "sslDays": 51,
         "note": "returned 404",
         "redirectChain": []
       }
@@ -47,9 +47,9 @@
         "url": "https://voynichtech.ca/",
         "finalUrl": "https://voynichtech.ca/",
         "statusCode": 200,
-        "responseTimeMs": 256,
+        "responseTimeMs": 160,
         "sslDays": 46,
-        "note": "200 in 256ms",
+        "note": "200 in 160ms",
         "redirectChain": []
       },
       "health": {
@@ -57,7 +57,7 @@
         "url": "https://voynichtech.ca/api/health",
         "finalUrl": "https://voynichtech.ca/api/health",
         "statusCode": 404,
-        "responseTimeMs": 241,
+        "responseTimeMs": 159,
         "sslDays": 46,
         "note": "returned 404",
         "redirectChain": []
@@ -73,19 +73,19 @@
         "url": "https://matchseer.com/",
         "finalUrl": "https://matchseer.com/",
         "statusCode": 200,
-        "responseTimeMs": 311,
-        "sslDays": 65,
-        "note": "200 in 311ms",
+        "responseTimeMs": 308,
+        "sslDays": 64,
+        "note": "200 in 308ms",
         "redirectChain": []
       },
       "health": {
-        "status": "missing",
+        "status": "connected",
         "url": "https://matchseer.com/api/health",
         "finalUrl": "https://matchseer.com/api/health",
-        "statusCode": 404,
-        "responseTimeMs": 217,
-        "sslDays": 65,
-        "note": "returned 404",
+        "statusCode": 200,
+        "responseTimeMs": 157,
+        "sslDays": 64,
+        "note": "200 in 157ms",
         "redirectChain": []
       }
     },
@@ -99,9 +99,9 @@
         "url": "https://niftytoolshub.com/",
         "finalUrl": "https://niftytoolshub.com/",
         "statusCode": 200,
-        "responseTimeMs": 323,
-        "sslDays": 77,
-        "note": "200 in 323ms",
+        "responseTimeMs": 180,
+        "sslDays": 76,
+        "note": "200 in 180ms",
         "redirectChain": []
       },
       "health": {
@@ -109,8 +109,8 @@
         "url": "https://niftytoolshub.com/api/health",
         "finalUrl": "https://niftytoolshub.com/api/health",
         "statusCode": 404,
-        "responseTimeMs": 313,
-        "sslDays": 77,
+        "responseTimeMs": 175,
+        "sslDays": 76,
         "note": "returned 404",
         "redirectChain": []
       }
@@ -125,9 +125,9 @@
         "url": "https://chronovisorai.com/",
         "finalUrl": "https://chronovisorai.com/",
         "statusCode": 200,
-        "responseTimeMs": 389,
+        "responseTimeMs": 235,
         "sslDays": 86,
-        "note": "200 in 389ms",
+        "note": "200 in 235ms",
         "redirectChain": []
       },
       "health": {
@@ -135,9 +135,9 @@
         "url": "https://chronovisorai.com/api/health",
         "finalUrl": "https://chronovisorai.com/api/health",
         "statusCode": 200,
-        "responseTimeMs": 1332,
+        "responseTimeMs": 1078,
         "sslDays": 86,
-        "note": "200 in 1332ms",
+        "note": "200 in 1078ms",
         "redirectChain": []
       }
     },
@@ -151,9 +151,9 @@
         "url": "https://www.vertmex.ca/",
         "finalUrl": "https://www.vertmex.ca/",
         "statusCode": 200,
-        "responseTimeMs": 510,
+        "responseTimeMs": 336,
         "sslDays": 45,
-        "note": "200 in 510ms",
+        "note": "200 in 336ms",
         "redirectChain": []
       },
       "health": {
@@ -161,7 +161,7 @@
         "url": "https://www.vertmex.ca/api/health",
         "finalUrl": "https://www.vertmex.ca/api/health",
         "statusCode": 404,
-        "responseTimeMs": 522,
+        "responseTimeMs": 266,
         "sslDays": 45,
         "note": "returned 404",
         "redirectChain": []
@@ -177,9 +177,9 @@
         "url": "https://keyscout.app/",
         "finalUrl": "https://keyscout.app/",
         "statusCode": 200,
-        "responseTimeMs": 654,
-        "sslDays": 37,
-        "note": "200 in 654ms",
+        "responseTimeMs": 522,
+        "sslDays": 36,
+        "note": "200 in 522ms",
         "redirectChain": []
       },
       "health": {
@@ -187,8 +187,8 @@
         "url": "https://keyscout.app/api/health",
         "finalUrl": "https://keyscout.app/api/health",
         "statusCode": 404,
-        "responseTimeMs": 614,
-        "sslDays": 37,
+        "responseTimeMs": 462,
+        "sslDays": 36,
         "note": "returned 404",
         "redirectChain": []
       }
@@ -203,9 +203,9 @@
         "url": "https://oddskies.com/",
         "finalUrl": "https://oddskies.com/",
         "statusCode": 200,
-        "responseTimeMs": 679,
-        "sslDays": 54,
-        "note": "200 in 679ms",
+        "responseTimeMs": 498,
+        "sslDays": 53,
+        "note": "200 in 498ms",
         "redirectChain": []
       },
       "health": {
@@ -213,8 +213,8 @@
         "url": "https://oddskies.com/api/health",
         "finalUrl": "https://oddskies.com/api/health",
         "statusCode": 404,
-        "responseTimeMs": 549,
-        "sslDays": 54,
+        "responseTimeMs": 431,
+        "sslDays": 53,
         "note": "returned 404",
         "redirectChain": []
       }
@@ -229,9 +229,9 @@
         "url": "https://yocomprolocal.com.mx/",
         "finalUrl": "https://yocomprolocal.com.mx/",
         "statusCode": 200,
-        "responseTimeMs": 2481,
-        "sslDays": 60,
-        "note": "200 in 2481ms",
+        "responseTimeMs": 2056,
+        "sslDays": 59,
+        "note": "200 in 2056ms",
         "redirectChain": []
       },
       "health": {
@@ -239,8 +239,8 @@
         "url": "https://yocomprolocal.com.mx/api/health",
         "finalUrl": "https://yocomprolocal.com.mx/api/health",
         "statusCode": 404,
-        "responseTimeMs": 840,
-        "sslDays": 60,
+        "responseTimeMs": 522,
+        "sslDays": 59,
         "note": "returned 404",
         "redirectChain": []
       }
