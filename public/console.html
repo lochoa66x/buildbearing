@@ -1847,6 +1847,10 @@
       animation: lift 240ms ease-out;
     }
 
+    .attention-focus {
+      animation: sectionFocus 900ms ease-out;
+    }
+
     @keyframes lift {
       from {
         transform: translateY(10px);
@@ -1855,6 +1859,15 @@
       to {
         transform: translateY(0);
         opacity: 1;
+      }
+    }
+
+    @keyframes sectionFocus {
+      0% {
+        box-shadow: 0 0 0 0 rgba(47, 143, 112, 0.35);
+      }
+      100% {
+        box-shadow: 0 0 0 18px rgba(47, 143, 112, 0);
       }
     }
 
@@ -1892,6 +1905,21 @@
       padding: 16px;
       display: grid;
       gap: 14px;
+    }
+
+    .diagnostic-note {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: var(--paper);
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .dialog-code {
+      display: block;
+      overflow-wrap: anywhere;
+      white-space: normal;
     }
 
     .form-grid {
@@ -2913,6 +2941,31 @@
     </form>
   </dialog>
 
+  <dialog id="diagnosticDialog">
+    <div class="dialog-header">
+      <div>
+        <h2 id="diagnosticTitle">DNS check</h2>
+        <p class="muted" id="diagnosticSubtitle">Domain diagnostic</p>
+      </div>
+      <button type="button" class="icon-button" id="closeDiagnosticDialog" aria-label="Close" title="Close" style="color:var(--ink);border-color:var(--line);background:#fff;">
+        <svg viewBox="0 0 24 24"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="dialog-body">
+      <div class="mini-grid">
+        <div class="mini-stat"><span>Domain</span><strong id="diagnosticDomain">-</strong></div>
+        <div class="mini-stat"><span>Website</span><strong id="diagnosticWebsite">-</strong></div>
+        <div class="mini-stat"><span>Health</span><strong id="diagnosticHealth">-</strong></div>
+      </div>
+      <div class="diagnostic-note" id="diagnosticNote">Select a site to inspect DNS and live-check notes.</div>
+      <code class="dialog-code" id="diagnosticUrl">-</code>
+    </div>
+    <div class="dialog-footer">
+      <button type="button" class="button" id="copyDiagnosticDomain">Copy domain</button>
+      <a class="button primary" id="openDiagnosticReport" href="#" target="_blank" rel="noopener noreferrer">Open DNS report</a>
+    </div>
+  </dialog>
+
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script>
@@ -3192,7 +3245,12 @@
       return "offline";
     }
 
+    function shouldKeepPlannedStatus(existingStatus, liveStatus) {
+      return ["planned", "pending", "idle"].includes(existingStatus) && liveStatus === "unreachable";
+    }
+
     function liveIncidentFor(website, health) {
+      if (["planned", "pending", "idle"].includes(website.status)) return "Launch or DNS pending";
       if (website.status === "unreachable") return "Website did not respond";
       if (["degraded", "error", "missing"].includes(website.status)) return `Website ${website.note || website.status}`;
       if (health.status === "unreachable") return "Health endpoint unreachable";
@@ -3217,9 +3275,10 @@
         const website = project.website || {};
         const health = project.health || {};
         if (website.status) {
+          const previousStatus = connectors.website?.status;
           connectors.website = {
             ...connectors.website,
-            status: website.status,
+            status: shouldKeepPlannedStatus(previousStatus, website.status) ? previousStatus : website.status,
             url: website.url || connectors.website?.url,
             finalUrl: website.finalUrl,
             note: website.note,
@@ -3230,9 +3289,10 @@
           };
         }
         if (health.status) {
+          const previousStatus = connectors.health?.status;
           connectors.health = {
             ...connectors.health,
-            status: health.status,
+            status: shouldKeepPlannedStatus(previousStatus, health.status) ? previousStatus : health.status,
             url: health.url || connectors.health?.url,
             finalUrl: health.finalUrl,
             note: health.note,
@@ -3254,6 +3314,7 @@
           : 0;
         site.ops.lastSync = site.ops.analytics === "online" ? shortTime(report.checkedAt) : "not connected";
         if (connectors.website.status === "unreachable") site.ops.uptime = 0;
+        if (["planned", "pending"].includes(connectors.website.status)) site.ops.uptime = 0;
         if (["connected", "protected"].includes(connectors.website.status)) site.ops.uptime = 100;
         site.ops.incident = liveIncidentFor(connectors.website, connectors.health);
       });
@@ -3347,7 +3408,6 @@
 
     function liveSnapshotSummary() {
       const registry = registryProjects();
-      if (liveUptimeReport?.summary?.total) return liveUptimeReport.summary;
       return {
         total: registry.length,
         websitesConnected: registry.filter((site) => ["connected", "protected"].includes(site.connectors?.website?.status)).length,
@@ -3476,6 +3536,76 @@
 
     function selectedSite() {
       return sites.find((site) => site.id === state.selectedId) || sites[0];
+    }
+
+    function focusSection(sectionId) {
+      const target = document.getElementById(sectionId);
+      if (!target) return;
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+      document.querySelectorAll("[data-scroll-target]").forEach((item) => {
+        item.classList.toggle("active", item.dataset.scrollTarget === sectionId);
+      });
+      target.classList.remove("attention-focus");
+      requestAnimationFrame(() => target.classList.add("attention-focus"));
+      window.setTimeout(() => target.classList.remove("attention-focus"), 1000);
+    }
+
+    function dnsLookupUrl(domain) {
+      return `https://toolbox.googleapps.com/apps/dig/#A/${encodeURIComponent(domain)}`;
+    }
+
+    function connectorDiagnosticText(connection) {
+      if (!connection) return "-";
+      const status = connection.status ? statusText(connection.status) : "-";
+      return connection.note ? `${status}: ${connection.note}` : status;
+    }
+
+    function showDnsDiagnostic(site) {
+      const connectors = site.connectors || defaultConnectors(site);
+      const lookup = dnsLookupUrl(site.domain);
+      $("#diagnosticTitle").textContent = `DNS check: ${site.name}`;
+      $("#diagnosticSubtitle").textContent = site.domain;
+      $("#diagnosticDomain").textContent = site.domain;
+      $("#diagnosticWebsite").textContent = connectorDiagnosticText(connectors.website);
+      $("#diagnosticHealth").textContent = connectorDiagnosticText(connectors.health);
+      $("#diagnosticNote").textContent = `${site.domain} is selected. Use the DNS report to confirm A, AAAA, CNAME, and propagation before treating this as a product outage.`;
+      $("#diagnosticUrl").textContent = lookup;
+      $("#openDiagnosticReport").href = lookup;
+      $("#diagnosticDialog").showModal();
+    }
+
+    function actionTargetFor(action) {
+      if (action === "Check DNS") return "dns";
+      if (action === "Open Ops" || action === "Inspect API" || action === "Profile endpoint") return "ops";
+      if (action === "Add /api/health" || action === "Connect") return "connect";
+      if (action === "Review traffic") return "overview";
+      if (action === "Decide") return "retire";
+      return "overview";
+    }
+
+    function handleAttentionAction(siteId, action) {
+      const site = sites.find((item) => item.id === siteId);
+      if (!site) return;
+      state.selectedId = site.id;
+      syncCalculatorWithSelected(false);
+      render();
+
+      const target = actionTargetFor(action);
+      window.setTimeout(() => focusSection(target === "dns" ? "connect" : target), 40);
+
+      if (target === "dns") {
+        showDnsDiagnostic(site);
+        toast(`DNS diagnostic ready for ${site.domain}.`);
+        return;
+      }
+
+      const labels = {
+        ops: `Live Ops focused on ${site.name}.`,
+        connect: `Connection kit focused on ${site.name}.`,
+        overview: `${site.name} selected.`,
+        retire: `Retirement queue focused on ${site.name}.`
+      };
+      toast(labels[target] || `${site.name} selected.`);
     }
 
     function scaledApi(site, key) {
@@ -3724,11 +3854,13 @@
         const add = (priority, type, title, detail, action) => {
           items.push({ site, priority, type, title, detail, action });
         };
+        const websiteUnreachable = site.connectors?.website?.status === "unreachable";
+        const healthUnreachable = site.connectors?.health?.status === "unreachable";
 
-        if (site.connectors?.website?.status === "unreachable") {
+        if (websiteUnreachable) {
           add(100, "offline", `${site.name} is unreachable`, `${site.domain} did not respond from the latest public check.`, "Check DNS");
         }
-        if (ops.web === "offline" || ops.api === "offline") {
+        if (!websiteUnreachable && (ops.web === "offline" || ops.api === "offline")) {
           add(96, "offline", `${site.name} has an offline service`, `${ops.web === "offline" ? "Website" : "API"} health is failing.`, "Open Ops");
         }
         if (ops.web === "degraded" || ops.api === "degraded") {
@@ -3742,6 +3874,7 @@
         }
         if (site.registryProject) {
           needs.filter((need) => need.field === "health").forEach((need) => {
+            if (websiteUnreachable || healthUnreachable) return;
             add(78, need.status === "unreachable" ? "offline" : "missing", `Wire health for ${site.name}`, `${connectorValue(need)} is ${need.status}.`, "Add /api/health");
           });
         }
@@ -4092,7 +4225,7 @@
               <strong>${item.title}</strong>
               <p>${item.detail}</p>
             </div>
-            <button class="small-button" data-attention-site="${item.site.id}">${item.action}</button>
+            <button class="small-button" data-attention-site="${item.site.id}" data-attention-action="${item.action}">${item.action}</button>
           </div>
         `;
       }).join("") || `<div class="empty-state">Nothing is screaming for attention. Nice problem to have.</div>`;
@@ -4125,9 +4258,16 @@
         </tr>
       `).join("") || `<tr><td colspan="4"><div class="empty-state">No momentum data yet.</div></td></tr>`;
 
-      document.querySelectorAll("[data-attention-site], #momentumTable tr[data-site-id]").forEach((target) => {
+      document.querySelectorAll("[data-attention-site]").forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.stopPropagation();
+          handleAttentionAction(button.dataset.attentionSite, button.dataset.attentionAction);
+        });
+      });
+
+      document.querySelectorAll("#momentumTable tr[data-site-id]").forEach((target) => {
         target.addEventListener("click", () => {
-          state.selectedId = target.dataset.attentionSite || target.dataset.siteId;
+          state.selectedId = target.dataset.siteId;
           syncCalculatorWithSelected(false);
           render();
         });
@@ -4282,7 +4422,7 @@
 
     function renderRegistryStatus(visible) {
       const registryCount = visible.filter((site) => site.registryProject).length;
-      const liveSummary = liveUptimeReport?.summary;
+      const liveSummary = liveSnapshotSummary();
       const liveText = registryState.checking ? "Checking..." : shortTime(registryState.liveCheckedAt);
       const supportText = registryState.liveCheckSupported ? "Server ready" : "Static view";
       $("#registryStatusStrip").innerHTML = [
@@ -4291,9 +4431,7 @@
         ["Live check", liveText],
         ["Mode", supportText]
       ].map(([label, value]) => `<div class="mini-stat"><span>${label}</span><strong>${value}</strong></div>`).join("");
-      if (liveSummary) {
-        $("#connectCaption").textContent = `${liveSummary.websitesConnected}/${liveSummary.total} websites live, ${liveSummary.healthConnected}/${liveSummary.total} health endpoints live, ${liveSummary.unreachable} unreachable`;
-      }
+      $("#connectCaption").textContent = `${liveSummary.websitesConnected}/${liveSummary.total} websites live, ${liveSummary.healthConnected}/${liveSummary.total} health endpoints live, ${liveSummary.unreachable} unreachable`;
     }
 
     function renderConnectors() {
@@ -4696,9 +4834,7 @@
 
       document.querySelectorAll("[data-scroll-target]").forEach((button) => {
         button.addEventListener("click", () => {
-          const target = document.getElementById(button.dataset.scrollTarget);
-          target.scrollIntoView({ behavior: "smooth", block: "start" });
-          document.querySelectorAll("[data-scroll-target]").forEach((item) => item.classList.toggle("active", item === button));
+          focusSection(button.dataset.scrollTarget);
         });
       });
 
@@ -4752,6 +4888,16 @@
       $("#addSiteButton").addEventListener("click", () => $("#siteDialog").showModal());
       $("#closeSiteDialog").addEventListener("click", () => $("#siteDialog").close());
       $("#cancelSiteButton").addEventListener("click", () => $("#siteDialog").close());
+      $("#closeDiagnosticDialog").addEventListener("click", () => $("#diagnosticDialog").close());
+      $("#copyDiagnosticDomain").addEventListener("click", async () => {
+        const domain = $("#diagnosticDomain").textContent;
+        try {
+          await navigator.clipboard.writeText(domain);
+          toast(`${domain} copied.`);
+        } catch (error) {
+          toast(domain);
+        }
+      });
       $("#siteForm").addEventListener("submit", (event) => {
         event.preventDefault();
         addSiteFromForm();
