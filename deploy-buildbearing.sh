@@ -30,7 +30,7 @@ fi
 
 echo "Running local checks..."
 npm run check
-node -e 'const fs=require("fs"); const traffic=fs.existsSync("data/traffic-summary.json")?"data/traffic-summary.json":"data/traffic-summary.example.json"; JSON.parse(fs.readFileSync("vercel.json","utf8")); JSON.parse(fs.readFileSync("public/connection-registry.json","utf8")); JSON.parse(fs.readFileSync("public/live-uptime-status.json","utf8")); JSON.parse(fs.readFileSync(traffic,"utf8")); JSON.parse(fs.readFileSync("data/search-summary.json","utf8")); console.log("JSON ok");'
+node -e 'const fs=require("fs"); const traffic=fs.existsSync("data/traffic-summary.json")?"data/traffic-summary.json":"data/traffic-summary.example.json"; const search=fs.existsSync("data/search-summary.json")?"data/search-summary.json":"data/search-summary.example.json"; JSON.parse(fs.readFileSync("vercel.json","utf8")); JSON.parse(fs.readFileSync("public/connection-registry.json","utf8")); JSON.parse(fs.readFileSync("public/live-uptime-status.json","utf8")); JSON.parse(fs.readFileSync(traffic,"utf8")); JSON.parse(fs.readFileSync(search,"utf8")); console.log("JSON ok");'
 
 if [[ -f ".vercel/project.json" ]]; then
   echo

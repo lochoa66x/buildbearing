@@ -1,3 +1,4 @@
 .vercel
 .env*
 data/traffic-summary.json
+data/search-summary.json

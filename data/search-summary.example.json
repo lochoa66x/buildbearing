@@ -6,6 +6,7 @@
   "message": "Connect Google Search Console properties or provide an export to populate search queries, clicks, impressions, CTR, and average position.",
   "sites": [
     { "id": "matchseer", "property": "sc-domain:matchseer.com", "status": "pending_credentials", "queries": [] },
+    { "id": "voynichtech", "property": "sc-domain:voynichtech.ca", "status": "pending_credentials", "queries": [] },
     { "id": "niftytoolshub", "property": "sc-domain:niftytoolshub.com", "status": "pending_credentials", "queries": [] },
     { "id": "chronovisorai", "property": "sc-domain:chronovisorai.com", "status": "pending_credentials", "queries": [] },
     { "id": "vertmex", "property": "sc-domain:vertmex.ca", "status": "pending_credentials", "queries": [] },

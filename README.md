@@ -22,6 +22,19 @@ CENTRE_SESSION_SECRET=random-long-session-secret
 
 Do not commit real values.
 
+Optional private data refreshes can also use:
+
+```text
+GOOGLE_SERVICE_ACCOUNT_JSON={"type":"service_account",...}
+GOOGLE_SERVICE_ACCOUNT_BASE64=base64-encoded-service-account-json
+GOOGLE_APPLICATION_CREDENTIALS=/absolute/path/to/service-account.json
+GOOGLE_SERVICE_ACCOUNT_FILE=/absolute/path/to/service-account.json
+GOOGLE_ACCESS_TOKEN=short-lived-oauth-token
+```
+
+Only one Google credential source is needed. Do not commit real Google
+credentials or generated metric snapshots.
+
 For local development only, the password falls back to:
 
 ```text
@@ -60,16 +73,38 @@ Settings, then deploy again.
 
 ## Current Live Snapshot
 
-- Projects checked: 6
-- Websites live: 5
+- Projects checked: 9
+- Websites live: 9
 - Health endpoints live: 1
-- Unreachable: 1
-- Missing `/api/health`: 4
+- Unreachable: 0
+- Missing `/api/health`: 8
+
+## Search Console Refresh
+
+The Search panel reads `data/search-summary.json` through the protected
+`/api/search-summary` endpoint. The real snapshot file is ignored by Git because
+it can contain private query and click data.
+
+To connect it:
+
+1. Enable the Google Search Console API in Google Cloud.
+2. Create OAuth credentials or a service account.
+3. Give that credential access to each Search Console property.
+4. Set one of the Google credential environment variables above.
+5. Run:
+
+```bash
+npm run refresh:search
+```
+
+The refresh uses the last finalized 30-day Search Console window and writes
+queries, clicks, impressions, CTR, and average position for the connected
+properties.
 
 ## Next Production Improvements
 
 - Add real `/api/health` endpoints to the connected projects.
 - Move uptime history into a database or durable KV store.
 - Add scheduled checks.
-- Connect analytics and Search Console.
+- Connect analytics.
 - Add proper user management if more people need access.
