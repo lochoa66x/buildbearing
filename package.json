@@ -10,6 +10,7 @@
     "refresh:traffic:matchseer": "node scripts/fetch-vercel-traffic.mjs"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "@vercel/functions": "^2.2.13"
   }
 }
